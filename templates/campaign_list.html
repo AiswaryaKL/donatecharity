@@ -1,0 +1,109 @@
+<div class="container mt-5">
+    <h2 class="text-center section-title">📢 Active Campaigns</h2>
+
+    {% if campaigns %}
+        {% for campaign in campaigns %}
+            {% if forloop.counter0|divisibleby:3 %}
+                <div class="row d-flex justify-content-center g-4"> <!-- Open row every 3 items -->
+            {% endif %}
+
+            <div class="col-md-4 d-flex">
+                <div class="card campaign-card h-100 w-100 d-flex flex-column">
+                    <div class="image-container">
+                        {% if campaign.image %}
+                            <img src="{{ campaign.image.url }}" class="campaign-img" alt="{{ campaign.title }}">
+                        {% else %}
+                            <img src="https://via.placeholder.com/200" class="campaign-img" alt="No Image Available">
+                        {% endif %}
+                    </div>
+                    <div class="card-body d-flex flex-column text-center">
+                        <h5 class="card-title">{{ campaign.title }}</h5>
+                        <p class="card-text flex-grow-1">{{ campaign.description|truncatewords:20 }}</p>
+                        <p class="fw-bold text-primary">🎯 Goal: Rs.{{ campaign.goal_amount }}</p>
+                        <p class="text-muted">📅 Ends on: {{ campaign.end_date }}</p>
+                        <a href="#" class="btn btn-success btn-donate mt-auto">Donate Now</a>
+                    </div>
+                </div>
+            </div>
+
+            {% if forloop.counter|divisibleby:3 or forloop.last %}
+                </div> <!-- Close row after every 3rd item -->
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <p class="text-center text-muted">No campaigns available.</p>
+    {% endif %}
+</div>
+
+<style>
+    /* General Styling */
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 30px;
+        color: #333;
+        text-transform: uppercase;
+    }
+
+    /* Campaign Card Styling */
+    .campaign-card {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        background-color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 15px;
+    }
+
+    .campaign-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Image Container for Centering */
+    .image-container {
+        width: 200px;
+        height: 200px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        margin-bottom: 15px;
+    }
+
+    /* Image Styling */
+    .campaign-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Ensures Square Images Without Stretching */
+    }
+
+    /* Donate Button Styling */
+    .btn-donate {
+        background-color: #28a745;
+        border: none;
+        font-weight: bold;
+        padding: 10px 15px;
+        border-radius: 8px;
+        transition: background 0.3s ease-in-out, transform 0.2s;
+        text-decoration: none;  /* Removes Underline */
+        display: inline-block; /* Ensures Proper Button Appearance */
+        color: white; /* Ensures Text is Visible */
+    }
+
+    .btn-donate:hover {
+        background-color: #218838;
+        transform: scale(1.05);
+        text-decoration: none;  /* 
+    }
+</style>

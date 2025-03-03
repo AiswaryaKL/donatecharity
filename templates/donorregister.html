@@ -1,0 +1,191 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <style>
+        /* General Body Styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: url('{% static "images/form-background.jpg" %}') no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Container for Form */
+        .container {
+            max-width: 450px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 1s ease-in-out;
+            width: 100%;
+        }
+
+        /* Heading */
+        h2 {
+            text-align: center;
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        /* Form Labels */
+        label {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #555;
+            display: block;
+        }
+
+        /* Input Fields */
+        input[type="text"], input[type="email"], input[type="password"], input[type="tel"], input[type="address"] {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            background-color: #f9f9f9;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, input[type="tel"]:focus {
+            border-color: #67c0a9;
+            outline: none;
+            background-color: #fff;
+            box-shadow: 0 0 8px rgba(103, 192, 169, 0.3);
+        }
+
+        /* Submit Button */
+        button[type="submit"] {
+            background-color: #67c0a9;
+            color: white;
+            border: none;
+            padding: 12px;
+            cursor: pointer;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #55a18d;
+        }
+
+        /* Error Messages */
+        .errorlist {
+            color: red;
+            font-size: 0.9em;
+        }
+
+        /* Link to Login */
+        .signup-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .signup-link a {
+            color: #67c0a9;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .signup-link a:hover {
+            color: #55a18d;
+        }
+
+        /* Animation for Form Fade In */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Register</h2>
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- Full Name -->
+        <label for="id_name">Full Name</label>
+        {{ form.name }}
+        {% if form.name.errors %}
+            <div class="errorlist">{{ form.name.errors }}</div>
+        {% endif %}
+
+        <!-- Email -->
+        <label for="id_email">Email</label>
+        {{ form.email }}
+        {% if form.email.errors %}
+            <div class="errorlist">{{ form.email.errors }}</div>
+        {% endif %}
+
+        <!-- Username -->
+        <label for="id_username">Username</label>
+        {{ form.username }}
+        {% if form.username.errors %}
+            <div class="errorlist">{{ form.username.errors }}</div>
+        {% endif %}
+
+        <!-- Password -->
+        <label for="id_password">Password</label>
+        {{ form.password }}
+        {% if form.password.errors %}
+            <div class="errorlist">{{ form.password.errors }}</div>
+        {% endif %}
+
+        <!-- Confirm Password -->
+        <label for="id_confirm_password">Confirm Password</label>
+        {{ form.confirm_password }}
+        {% if form.confirm_password.errors %}
+            <div class="errorlist">{{ form.confirm_password.errors }}</div>
+        {% endif %}
+
+        <!-- Phone Number -->
+        <label for="id_phone">Phone Number</label>
+        {{ form.phone }}
+        {% if form.phone.errors %}
+            <div class="errorlist">{{ form.phone.errors }}</div>
+        {% endif %}
+
+        <!-- Address -->
+        <label for="id_address">Address</label>
+        {{ form.address }}
+        {% if form.address.errors %}
+            <div class="errorlist">{{ form.address.errors }}</div>
+        {% endif %}
+
+        <!-- Submit Button -->
+        <button type="submit">Register</button>
+    </form>
+
+    <div class="signup-link">
+        <p>Already have an account? <a href="{% url 'donorlogin' %}">Login now</a></p>
+    </div>
+</div>
+
+</body>
+</html>
