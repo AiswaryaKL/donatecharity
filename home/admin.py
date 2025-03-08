@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import DonorRegister
 from .models import OrganizationRegister
 from .models import Organization,Campaign
+from .models import Donation
 
 # Register your models here.
 class DonorRegisterAdmin(admin.ModelAdmin):
@@ -28,7 +29,12 @@ class CampaignAdmin(admin.ModelAdmin):
     list_filter = ("end_date", "organization")  # Filter campaigns by end date and organization
     date_hierarchy = "end_date"  # Adds a date-based navigation bar
 
-
+@admin.register(Donation)
+class DonationAdmin(admin.ModelAdmin):
+    list_display = ('user', 'campaign', 'amount', 'payment_id', 'date')
+    search_fields = ('user__username', 'campaign__title', 'payment_id')
+    list_filter = ('date', 'campaign')
+    ordering = ('-date',)
 
 
 

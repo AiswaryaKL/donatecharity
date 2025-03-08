@@ -16,7 +16,7 @@ urlpatterns = [
     path('donor/', views.donor, name='donor'),
     path('manageprofile/', views.manageprofile, name='manageprofile'),
     path('view_campaign/', views.view_campaign, name='view_campaign'),
-    path('makedonation/', views.makedonation, name='makedonation'),
+    path('makedonation/<int:campaign_id>/', views.makedonation, name='makedonation'),
     path('donationhistory/', views.donationhistory, name='donationhistory'),
     path('donorfeedback/', views.donorfeedback, name='donorfeedback'),
     path('donorcomplaint/', views.donorcomplaint, name='donorcomplaint'),
@@ -26,7 +26,11 @@ urlpatterns = [
     path('create_campaign/', views.create_campaign, name='create_campaign'),
     path("campaigns/", views.campaign_list, name="campaign_list"),
     path('adminlogin/', views.adminlogin, name='adminlogin'),
+    path("admin_logout/", views.admin_logout, name="admin_logout"),
+    path("organization_logout/", views.organization_logout, name="organization_logout"),
     path('admindashboard/', views.admindashboard, name='admindashboard'),
     path('org_editprofile/', views.org_editprofile, name='org_editprofile'),
+    path('payment-success/', views.payment_success, name='payment_success'),
+    
 
 ]

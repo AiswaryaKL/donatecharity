@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.shortcuts import render,get_object_or_404
 from django.shortcuts import redirect
 from django.contrib import messages
+import razorpay
 from django.conf import settings
 from .models import DonorRegister
 from .forms import DonorRegistrationForm
@@ -14,7 +15,7 @@ from django.contrib.auth import authenticate,login
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .forms import OrganizationForm
 from .models import Organization
-from .models import Campaign
+from .models import Campaign,Donation
 from .forms import CampaignForm 
 
 
@@ -148,9 +149,11 @@ def organizationregister(request):
 
 
 
-
 def donor(request):
-    return render(request, 'donor.html')
+    campaigns = Campaign.objects.all()
+    print(campaigns)  # Debugging: See if campaigns are fetched
+    return render(request, 'donor.html', {'campaigns': campaigns})
+
 def manageprofile(request):
     return render(request, 'manageprofile.html')
 
@@ -163,10 +166,58 @@ def view_campaign(request):
 
     return render(request, 'view_campaign.html', {'campaigns': campaigns, 'query': query})
 
-def makedonation(request):
-    return render(request, 'makedonation.html')
+
+
+def makedonation(request, campaign_id):
+    campaign = get_object_or_404(Campaign, id=campaign_id)
+
+    if request.method == "POST":
+        amount = int(request.POST.get("amount")) * 100  # Convert to paise
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+        payment = client.order.create({
+            "amount": amount,
+            "currency": "INR",
+            "payment_capture": "1"
+        })
+
+        return render(request, 'makedonation.html', {
+            'campaign': campaign,
+            'razorpay_key': settings.RAZORPAY_KEY_ID,
+            'order_id': payment['id'],
+            'amount': amount
+        })
+
+    return render(request, 'makedonation.html', {'campaign': campaign, 'razorpay_key': settings.RAZORPAY_KEY_ID})
+
+
+
+
+@login_required
+def payment_success(request):
+    payment_id = request.GET.get("payment_id")
+    campaign_id = request.GET.get("campaign_id")
+    amount = request.GET.get("amount")
+
+    if not (payment_id and campaign_id and amount):
+        return redirect('home')  # Redirect if any required param is missing
+
+    campaign = get_object_or_404(Campaign, id=campaign_id)
+
+    # Ensure the user is authenticated
+    if request.user.is_authenticated:
+        donation = Donation.objects.create(
+            user=request.user,
+            campaign=campaign,
+            amount=float(amount) / 100,  # Convert paise to INR
+            payment_id=payment_id
+        )
+
+    return render(request, 'payment_success.html')
+
 def donationhistory(request):
-    return render(request, 'donationhistory.html')
+    donations = Donation.objects.filter(user=request.user).order_by('-date')
+    return render(request, 'donationhistory.html', {'donations': donations})
+
 def donorfeedback(request):
     return render(request, 'donorfeedback.html')
 def donorcomplaint(request):
@@ -230,13 +281,37 @@ def org_editprofile(request):
     return render(request, 'org_editprofile.html', {'form': form})
 
 
-def admindashboard(request):
-    return render(request, 'admin.html')
+
 
 def is_admin(user):
     return user.is_authenticated and user.is_superuser
 
-@login_required(login_url='adminlogin')
-@user_passes_test(is_admin, login_url='adminlogin')
-def admin_dashboard(request):
-    return render(request, 'admin.html') 
+def adminlogin(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None and user.is_superuser:
+            login(request, user)
+            return redirect("admindashboard")  # Redirect to the admin dashboard
+        else:
+            return render(request, "adminlogin.html", {"error": "Invalid credentials or not an admin"})
+
+    return render(request, "adminlogin.html")  # Show login form if GET request
+
+@login_required(login_url="adminlogin")
+@user_passes_test(is_admin, login_url="adminlogin")
+def admindashboard(request):
+    return render(request, "admin.html")
+
+@login_required
+def admin_logout(request):
+    logout(request)
+    return redirect("adminlogin")
+
+
+@login_required
+def organization_logout(request):
+    logout(request)
+    return redirect("organization")

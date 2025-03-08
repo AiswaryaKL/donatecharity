@@ -12,85 +12,64 @@
             padding: 0;
             background: #f4f4f9;
         }
-        .header {
-            background-color: #4CAF50;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-        .sidebar {
-            height: 100vh;
-            width: 250px;
-            position: fixed;
-            background: #333;
-            color: white;
+        .navbar {
+            background-color: #333;
+            overflow: hidden;
+            padding: 15px 20px;
             display: flex;
-            flex-direction: column;
-            padding: 15px;
+            justify-content: space-between;
+            align-items: center;
         }
-        .sidebar a {
+        .navbar a {
             color: white;
             text-decoration: none;
-            margin: 10px 0;
-            padding: 10px;
+            padding: 10px 15px;
             border-radius: 5px;
             transition: background 0.3s;
         }
-        .sidebar a:hover {
-            background: #4CAF50;
+        .navbar a:hover {
+            background-color: #4CAF50;
+        }
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+        .logout-btn {
+            background: red;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+        }
+        .logout-btn:hover {
+            background: darkred;
         }
         .main-content {
-            margin-left: 260px;
             padding: 20px;
-        }
-        .card {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        .card h3 {
-            margin: 0;
-            color: #333;
-        }
-        .card p {
-            color: #666;
-            margin-top: 10px;
-        }
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: background 0.3s;
-        }
-        .btn:hover {
-            background: #45a049;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <div class="header">
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <div class="nav-links">
+            
+            <a href="">Allocate Donations</a>
+            <a href="">Track Donations</a>
+            <a href="">Manage Charity Reports</a>
+            <a href="">View Feedback</a>
+            <a href="">View Complaints</a>
+            <a href="">Account Details</a>
+        </div>
+        <a href="{% url 'admin_logout' %}" class="logout-btn">Logout</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
         <h1>Welcome, Admin</h1>
-    </div>
-    <div class="sidebar">
-        <h2>Navigation</h2>
-        <a href="">Verify Organizations</a>
-        <a href="">Verify Donors</a>
-        <a href="">Allocate Donations</a>
-        <a href="">Track Donations</a>
-        <a href="">Manage Charity Reports</a>
-        <a href="">Upload Posts</a>
-        <a href="">View Feedback</a>
-        <a href="">View Complaints</a>
-        <a href="">Account Details</a>
-    </div>
-    
+        <p>Manage the donation platform efficiently.</p>
     </div>
 </body>
 </html>
