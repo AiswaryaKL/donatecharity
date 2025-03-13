@@ -7,13 +7,12 @@ urlpatterns = [
     path('about/', views.about, name='about'),
     path('contact/', views.contact, name='contact'),
     path('donorregister/',views.donorregister,name='donorregister'),
-    path('donorlogin.html', views.donorlogin, name='donorlogin'),
-    path('donorlogin/', views.donorlogin_view, name='donorlogin_post'),
+    path('donorlogin/', views.donorlogin, name='donorlogin'),
     path('organizationregister/',views.organizationregister,name='organizationregister'),
-    path('organizationlogin.html', views.organizationlogin, name='organizationlogin'),
-    path('organizationlogin/', views.organizationlogin_view, name='organizationbnlogin_post'),
+    path('organizationlogin/', views.organizationlogin, name='organizationlogin'),
     path('logout/', LogoutView.as_view(next_page='/home/'), name='logout'),
     path('donor/', views.donor, name='donor'),
+    path('donor_profile/', views.donor_profile, name='donor_profile'),
     path('manageprofile/', views.manageprofile, name='manageprofile'),
     path('view_campaign/', views.view_campaign, name='view_campaign'),
     path('makedonation/<int:campaign_id>/', views.makedonation, name='makedonation'),
@@ -27,10 +26,11 @@ urlpatterns = [
     path("campaigns/", views.campaign_list, name="campaign_list"),
     path('adminlogin/', views.adminlogin, name='adminlogin'),
     path("admin_logout/", views.admin_logout, name="admin_logout"),
-    path("organization_logout/", views.organization_logout, name="organization_logout"),
+    
     path('admindashboard/', views.admindashboard, name='admindashboard'),
     path('org_editprofile/', views.org_editprofile, name='org_editprofile'),
     path('payment-success/', views.payment_success, name='payment_success'),
+    
     
 
 ]

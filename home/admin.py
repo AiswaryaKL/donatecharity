@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import DonorRegister
 from .models import OrganizationRegister
 from .models import Organization,Campaign
-from .models import Donation
+from .models import Donation,Donor
 
 # Register your models here.
 class DonorRegisterAdmin(admin.ModelAdmin):
@@ -11,9 +11,13 @@ class DonorRegisterAdmin(admin.ModelAdmin):
 admin.site.register(DonorRegister,DonorRegisterAdmin)
 
 class OrganizationRegisterAdmin(admin.ModelAdmin):
-    list_display=('name','phone','email','address','username')
-    search_fields=('gender',)
-admin.site.register(OrganizationRegister,OrganizationRegisterAdmin)
+    list_display = ('username', 'name', 'email', 'phone', 'address')  # Columns displayed in admin panel
+    search_fields = ('username', 'name', 'email')  # Search functionality
+    list_filter = ('name',)  # Filter options in the sidebar
+    ordering = ('username',)  # Default ordering
+    readonly_fields = ('password',)  # Prevent editing password directly (consider using Django auth system)
+
+admin.site.register(OrganizationRegister, OrganizationRegisterAdmin)
 
 @admin.register(Organization)
 class OrganizationAdmin(admin.ModelAdmin):
@@ -21,6 +25,8 @@ class OrganizationAdmin(admin.ModelAdmin):
     search_fields = ("name", "email", "phone", "place")  # Searchable fields
     list_filter = ("place",)  # Filter organizations by place
     ordering = ("name",)  # Default ordering by name
+
+
 
 @admin.register(Campaign)
 class CampaignAdmin(admin.ModelAdmin):
@@ -35,6 +41,15 @@ class DonationAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'campaign__title', 'payment_id')
     list_filter = ('date', 'campaign')
     ordering = ('-date',)
+
+class DonorAdmin(admin.ModelAdmin):
+    list_display = ('user', 'name', 'email', 'phone', 'total_donations')
+    search_fields = ('user__username', 'name', 'email', 'phone')
+    list_filter = ('total_donations',)
+    ordering = ('user',)
+    
+admin.site.register(Donor, DonorAdmin)
+
 
 
 

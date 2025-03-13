@@ -1,6 +1,6 @@
 from django import forms
 from .models import DonorRegister
-from .models import Organization,Campaign
+from .models import Organization,Campaign,Donor
 
 
 class DonorRegistrationForm(forms.ModelForm):
@@ -167,6 +167,7 @@ class OrganizationForm(forms.ModelForm):
         model = Organization
         fields = ['name', 'email', 'phone', 'address', 'place', 'id_proof']
 
+
 class CampaignForm(forms.ModelForm):
     class Meta:
         model = Campaign
@@ -175,3 +176,8 @@ class CampaignForm(forms.ModelForm):
             'end_date': forms.DateInput(attrs={'type': 'date'}),
             'description': forms.Textarea(attrs={'rows': 4}),
         }
+
+class DonorProfileForm(forms.ModelForm):
+    class Meta:
+        model = Donor
+        fields = ['name', 'phone', 'email', 'address', 'date_of_birth']

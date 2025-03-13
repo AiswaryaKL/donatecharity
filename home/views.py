@@ -3,6 +3,8 @@ from django.shortcuts import render,get_object_or_404
 from django.shortcuts import redirect
 from django.contrib import messages
 import razorpay
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
 from django.conf import settings
 from .models import DonorRegister
 from .forms import DonorRegistrationForm
@@ -12,6 +14,7 @@ from django.urls import reverse
 from django.contrib.auth import logout
 from django.http import HttpResponse
 from django.contrib.auth import authenticate,login
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .forms import OrganizationForm
 from .models import Organization
@@ -48,48 +51,43 @@ def adminlogin(request):
     
     return render(request, 'adminlogin.html')  # Load admin login page
 
+
+@csrf_exempt
 def donorlogin(request):
     if request.method == "POST":
         username = request.POST["uname"]
         password = request.POST["password"]
         
-        # Check if the username exists
-        user = DonorRegister.objects.filter(username=username).first()
-        
-        # If username doesn't exist or password is incorrect
-        if user is None:
-            messages.error(request, 'Invalid username or password')
-            return redirect('donorlogin')
-        elif user.password != password:
-            messages.error(request, 'Invalid password')
-            return redirect('donorlogin')
-        else:
-            request.session['uname'] = username
-            return redirect('donor')
-    return render(request, "donorlogin.html")
-
-def donorlogin_page(request):
-    return render(request, 'donorlogin.html')
-
-def donorlogin_view(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        
-        # Try to authenticate user
+        # Authenticate user
         user = authenticate(request, username=username, password=password)
         
         if user is not None:
             login(request, user)
-            return redirect('donor')  # Redirect to home page or any other page after successful login
+            return redirect('donor')
         else:
             messages.error(request, 'Invalid username or password')
-    return render(request, 'donorlogin.html')
+            return redirect('donorlogin')
+    
+    return render(request, "donorlogin.html")
 def donorregister(request):
     if request.method == "POST":
         form = DonorRegistrationForm(request.POST)
         if form.is_valid():
-            form.save()  # Saves the user data to the database
+            user = User.objects.create_user(
+                username=form.cleaned_data['username'],
+                password=form.cleaned_data['password'],
+                email=form.cleaned_data['email']
+            )
+            donor = DonorRegister(
+                user=user,
+                name=form.cleaned_data['name'],
+                phone=form.cleaned_data['phone'],
+                email=form.cleaned_data['email'],
+                address=form.cleaned_data['address'],
+                username=form.cleaned_data['username'],
+                password=form.cleaned_data['password']  # Storing passwords in plain text is insecure
+            )
+            donor.save()
             messages.success(request, 'Registration successful! You can now log in.')
             return redirect('donorlogin')
     else:
@@ -98,61 +96,67 @@ def donorregister(request):
     return render(request, 'donorregister.html', {'form': form})
 
 
+@csrf_exempt
 def organizationlogin(request):
     if request.method == "POST":
-        username = request.POST["uname"]
-        password = request.POST["password"]
-        
-        # Check if the username exists
-        user = OrganizationRegister.objects.filter(username=username).first()
-        
-        # If username doesn't exist or password is incorrect
-        if user is None:
+        username = request.POST.get("uname")
+        password = request.POST.get("password")
+
+        user = authenticate(request, username=username, password=password)  # Authenticate the user
+
+        if user is not None:
+            login(request, user)  # Log the user in
+            return redirect('organization')  # Redirect to organization profile page
+        else:
             messages.error(request, 'Invalid username or password')
             return redirect('organizationlogin')
-        elif user.password != password:
-            messages.error(request, 'Invalid password')
-            return redirect('organizationlogin')
-        else:
-            request.session['uname'] = username
-            return redirect('organization')
+
     return render(request, "organizationlogin.html")
 
-def organizationlogin_page(request):
-    return render(request, 'organizationlogin.html')
 
-def organizationlogin_view(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        
-        # Try to authenticate user
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None:
-            login(request, user)
-            return redirect('organization')  # Redirect to home page or any other page after successful login
-        else:
-            messages.error(request, 'Invalid username or password')
-    return render(request, 'organizationlogin.html')
+
 def organizationregister(request):
     if request.method == "POST":
         form = OrganizationRegistrationForm(request.POST)
         if form.is_valid():
-            form.save()  # Saves the user data to the database
+            # Create User
+            user = User.objects.create_user(
+                username=form.cleaned_data['username'],
+                email=form.cleaned_data['email'],
+                password=form.cleaned_data['password']
+            )
+
+            # Save OrganizationRegister and link it to the user
+            organization_register = form.save(commit=False)
+            organization_register.user = user
+            organization_register.password = make_password(form.cleaned_data['password'])  # Secure password
+            organization_register.save()
+
+            # Automatically create an Organization profile linked to the user
+            Organization.objects.create(
+                user=user,
+                name=form.cleaned_data['name'],
+                email=form.cleaned_data['email'],
+                phone=form.cleaned_data['phone'],
+                address=form.cleaned_data['address']
+            )
+
             messages.success(request, 'Registration successful! You can now log in.')
             return redirect('organizationlogin')
+
     else:
-        form = DonorRegistrationForm()
+        form = OrganizationRegistrationForm()
 
     return render(request, 'organizationregister.html', {'form': form})
-
 
 
 def donor(request):
     campaigns = Campaign.objects.all()
     print(campaigns)  # Debugging: See if campaigns are fetched
     return render(request, 'donor.html', {'campaigns': campaigns})
+
+def donor_profile(request):
+    return render(request, 'donor_profile.html')
 
 def manageprofile(request):
     return render(request, 'manageprofile.html')
@@ -233,10 +237,45 @@ def organization(request):
     return render(request, 'organization.html') 
 def organization(request):
     return render(request, 'organization.html')
+
 @login_required
 def org_profile(request):
-    organization = get_object_or_404(Organization, id=1)  # Adjust this if multiple organizations exist
+    user = request.user
+
+    # Fetch the organization linked to the logged-in user
+    organization = Organization.objects.filter(user=user).first()
+
+    if not organization:
+        return render(request, 'org_profile.html', {'error': "No organization profile found!"})
+
     return render(request, 'org_profile.html', {'organization': organization})
+@login_required
+def org_editprofile(request):
+    user = request.user
+
+    # Get the registered organization details
+    organization = Organization.objects.filter(user=user).first()
+    org_register = OrganizationRegister.objects.filter(user=user).first()
+
+    if request.method == "POST":
+        organization.name = request.POST.get("name", organization.name)
+        organization.email = request.POST.get("email", organization.email)
+        organization.phone = request.POST.get("phone", organization.phone)
+        organization.address = request.POST.get("address", organization.address)
+        organization.place = request.POST.get("place", organization.place)
+
+        # Handle ID Proof upload
+        if request.FILES.get("id_proof"):
+            organization.id_proof = request.FILES["id_proof"]
+
+        organization.save()
+        messages.success(request, "Profile updated successfully!")
+        return redirect("org_profile")
+
+    return render(request, "org_editprofile.html", {
+        "organization": organization,
+        "org_register": org_register
+    })
 
 
 
@@ -265,20 +304,6 @@ def campaign_list(request):
     campaigns = Campaign.objects.all()
     return render(request, "campaign_list.html", {"campaigns": campaigns})
 
-
-@login_required
-def org_editprofile(request):
-    organization = Organization.objects.first()  # Modify this if organizations are user-specific
-
-    if request.method == "POST":
-        form = OrganizationForm(request.POST, request.FILES, instance=organization)
-        if form.is_valid():
-            form.save()
-            return redirect('org_profile')  # Redirect to profile page after saving
-    else:
-        form = OrganizationForm(instance=organization)
-
-    return render(request, 'org_editprofile.html', {'form': form})
 
 
 
@@ -311,7 +336,3 @@ def admin_logout(request):
     return redirect("adminlogin")
 
 
-@login_required
-def organization_logout(request):
-    logout(request)
-    return redirect("organization")
