@@ -8,57 +8,80 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body { 
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            background: linear-gradient(135deg,rgb(236, 167, 196),rgb(218, 168, 171));
             font-family: 'Poppins', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            overflow: hidden;
+            position: relative;
         }
         .success-box {
             max-width: 500px;
-            padding: 30px;
+            padding: 40px;
             background: white;
-            border-radius: 12px;
+            border-radius: 20px;
             text-align: center;
-            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
-            animation: fadeIn 1s ease-in-out;
+            box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.3);
+            animation: slideIn 1s ease-in-out;
+            position: relative;
+            z-index: 2;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
         .checkmark {
-            font-size: 60px;
+            font-size: 80px;
             color: #2ecc71;
-            animation: bounce 1s infinite alternate;
+            animation: pop 0.8s ease-in-out infinite alternate;
         }
-        @keyframes bounce {
+        @keyframes pop {
             from { transform: scale(1); }
             to { transform: scale(1.1); }
         }
         h2 {
             color: #2ecc71;
             font-weight: 600;
+            margin-top: 20px;
         }
         p {
             font-size: 18px;
-            color: #555;
+            color: #333;
+            margin-bottom: 20px;
         }
         .btn-home {
-            background: #27ae60;
+            background: #ff6b6b;
             border: none;
-            padding: 12px 20px;
+            padding: 12px 25px;
             font-size: 18px;
-            border-radius: 8px;
+            border-radius: 30px;
             text-decoration: none;
             color: white;
+            font-weight: bold;
             display: inline-block;
             transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
         }
         .btn-home:hover {
-            background: #219150;
-            transform: scale(1.05);
+            background: #e63946;
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.5);
+        }
+        /* Falling Stars Animation */
+        .star {
+            position: absolute;
+            top: -10px;
+            color: #FFD700;
+            opacity: 0.7;
+            font-size: 5px;
+            text-shadow: 0 0 5px rgba(255, 223, 0, 0.9);
+            animation: fall linear infinite;
+        }
+        @keyframes fall {
+            from { transform: translateY(-10px) rotate(0deg); opacity: 0.9; }
+            to { transform: translateY(100vh) rotate(360deg); opacity: 0.3; }
         }
     </style>
 </head>
@@ -66,8 +89,29 @@
     <div class="success-box">
         <div class="checkmark">✔</div>
         <h2>Payment Successful!</h2>
-        <p>Thank you for your donation! Your support is greatly appreciated.</p>
+        <p>Thank you for your donation! Your support is greatly appreciated. 🎉</p>
         <a href="{% url 'donor' %}" class="btn-home">Return to Home</a>
     </div>
+    
+    <script>
+        function createStar() {
+            const star = document.createElement("div");
+            star.classList.add("star");
+            star.innerHTML = "★";
+            document.body.appendChild(star);
+            
+            // Random position & size
+            let size = Math.random() * 10 + 5; // Small stars (5px - 15px)
+            star.style.left = Math.random() * window.innerWidth + "px";
+            star.style.fontSize = size + "px"; // Set small stars
+            star.style.animationDuration = (Math.random() * 3 + 2) + "s"; // Fall speed
+            
+            setTimeout(() => {
+                star.remove();
+            }, 5000);
+        }
+        
+        setInterval(createStar, 200); // Faster star spawning
+    </script>
 </body>
 </html>

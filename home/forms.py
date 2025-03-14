@@ -1,6 +1,6 @@
 from django import forms
 from .models import DonorRegister
-from .models import Organization,Campaign,Donor
+from .models import Organization,Campaign,Donor,Feedback,Complaint
 
 
 class DonorRegistrationForm(forms.ModelForm):
@@ -181,3 +181,13 @@ class DonorProfileForm(forms.ModelForm):
     class Meta:
         model = Donor
         fields = ['name', 'phone', 'email', 'address', 'date_of_birth']
+
+class FeedbackForm(forms.ModelForm):
+    class Meta:
+        model = Feedback
+        fields = ['user_type', 'message', 'rating']
+
+class ComplaintForm(forms.ModelForm):
+    class Meta:
+        model = Complaint
+        fields = ['subject', 'message']

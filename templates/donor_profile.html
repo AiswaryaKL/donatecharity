@@ -1,14 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donor Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Full-Screen Background with Gradient */
+        body {
+            background: linear-gradient(135deg, #ff758c, #ff7eb3, #6a11cb);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+        }
 
-<div class="container mt-5">
-    <h2>Donor Profile</h2>
-    <div class="card p-4 shadow-sm">
-        <p><strong>Name:</strong> {{ donor.name }}</p>
-        <p><strong>Email:</strong> {{ donor.email }}</p>
-        <p><strong>Phone:</strong> {{ donor.phone }}</p>
-        <p><strong>Address:</strong> {{ donor.address }}</p>
-        <p><strong>Date of Birth:</strong> {{ donor.date_of_birth|date:'Y-m-d' }}</p>
-        <p><strong>Total Donations:</strong> {{ donor.total_donations }}</p>
-        <a href="{% url 'manageprofile' %}" class="btn btn-primary mt-3">Edit Profile</a>
+        /* Glassmorphism Card Effect */
+        .profile-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            color: white;
+            transition: transform 0.3s ease;
+        }
+
+        .profile-card:hover {
+            transform: scale(1.02);
+        }
+
+        /* Stylish Profile Title */
+        .profile-title {
+            font-size: 2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #ff7eb3, #6a11cb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Profile Info Styling */
+        .profile-info {
+            font-size: 1.2rem;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 8px 0;
+        }
+
+        .badge-custom {
+            background: rgba(0, 255, 127, 0.8);
+            font-size: 1.1rem;
+            padding: 6px 12px;
+            border-radius: 8px;
+        }
+
+        /* Buttons */
+        .action-btn {
+            background: linear-gradient(135deg, #ff7eb3, #ff758c);
+            color: white;
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            border-radius: 25px;
+            border: none;
+            transition: 0.3s ease;
+            margin: 10px;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+            background: linear-gradient(135deg, #6a11cb, #ff7eb3);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="profile-card">
+        <h2 class="profile-title">Donor Profile</h2>
+        <div class="profile-info"><strong>Name:</strong> {{ donor.name }}</div>
+        <div class="profile-info"><strong>Email:</strong> {{ donor.email }}</div>
+        <div class="profile-info"><strong>Phone:</strong> {{ donor.phone }}</div>
+        <div class="profile-info"><strong>Address:</strong> {{ donor.address }}</div>
+        <div class="profile-info"><strong>Date of Birth:</strong> {{ donor.date_of_birth|date:'Y-m-d' }}</div>
+        <div class="profile-info"><strong>Total Donations:</strong> 
+            <span class="badge-custom">{{ donor.total_donations }}</span>
+        </div>
+
+        <a href="{% url 'manageprofile' %}">
+            <button class="action-btn">Edit Profile</button>
+        </a>
+
+        <a href="{% url 'donor' %}">
+            <button class="action-btn">Back to Home</button>
+        </a>
     </div>
-</div>
 
+</body>
+</html>

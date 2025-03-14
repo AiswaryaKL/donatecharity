@@ -30,7 +30,14 @@ urlpatterns = [
     path('admindashboard/', views.admindashboard, name='admindashboard'),
     path('org_editprofile/', views.org_editprofile, name='org_editprofile'),
     path('payment-success/', views.payment_success, name='payment_success'),
-    
+    path('feedback/', views.feedback, name='feedback'),
+    path('viewfeedback/', views.viewfeedback, name='viewfeedback'),
+    path('feedback_success', views.feedback_success, name='feedback_success'),
+    path('complaint/', views.submit_complaint, name='submit_complaint'),
+    path('complaints/', views.complaint_list, name='complaint_list'),
+    path('complaints/', views.admin_complaints, name='admin_complaints'),
+    path('respond/<int:complaint_id>/', views.respond_complaint, name='respond_complaint'),
+    path('logout/', views.donorlogout, name='donorlogout'),
     
 
 ]

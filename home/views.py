@@ -3,9 +3,14 @@ from django.shortcuts import render,get_object_or_404
 from django.shortcuts import redirect
 from django.contrib import messages
 import razorpay
+from .forms import DonorProfileForm
+from .models import Feedback
+from .forms import FeedbackForm
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.conf import settings
+from .models import Complaint
+from .forms import ComplaintForm
 from .models import DonorRegister
 from .forms import DonorRegistrationForm
 from .models import OrganizationRegister
@@ -18,7 +23,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .forms import OrganizationForm
 from .models import Organization
-from .models import Campaign,Donation
+from .models import Campaign,Donation,Donor
 from .forms import CampaignForm 
 
 
@@ -78,24 +83,32 @@ def donorregister(request):
                 password=form.cleaned_data['password'],
                 email=form.cleaned_data['email']
             )
-            donor = DonorRegister(
+            donor_register = DonorRegister(
                 user=user,
                 name=form.cleaned_data['name'],
                 phone=form.cleaned_data['phone'],
                 email=form.cleaned_data['email'],
                 address=form.cleaned_data['address'],
                 username=form.cleaned_data['username'],
-                password=form.cleaned_data['password']  # Storing passwords in plain text is insecure
+                password=form.cleaned_data['password']
             )
-            donor.save()
+            donor_register.save()
+
+            # Also create a Donor instance
+            donor = Donor.objects.create(
+                user=user,
+                name=form.cleaned_data['name'],
+                phone=form.cleaned_data['phone'],
+                email=form.cleaned_data['email'],
+                address=form.cleaned_data['address']
+            )
+
             messages.success(request, 'Registration successful! You can now log in.')
             return redirect('donorlogin')
     else:
         form = DonorRegistrationForm()
 
     return render(request, 'donorregister.html', {'form': form})
-
-
 @csrf_exempt
 def organizationlogin(request):
     if request.method == "POST":
@@ -155,11 +168,38 @@ def donor(request):
     print(campaigns)  # Debugging: See if campaigns are fetched
     return render(request, 'donor.html', {'campaigns': campaigns})
 
+@login_required
 def donor_profile(request):
-    return render(request, 'donor_profile.html')
+    user = request.user
 
+    # Fetch the donor profile linked to the logged-in user
+    donor = Donor.objects.filter(user=user).first()
+
+    if not donor:
+        return render(request, 'donor_profile.html', {'error': "No donor profile found!"})
+
+    return render(request, 'donor_profile.html', {'donor': donor})
+@login_required
 def manageprofile(request):
-    return render(request, 'manageprofile.html')
+    user = request.user
+
+    # Fetch donor profile
+    donor = Donor.objects.filter(user=user).first()
+
+    if not donor:
+        messages.error(request, "No donor profile found!")
+        return redirect('donor_profile')
+
+    if request.method == "POST":
+        form = DonorProfileForm(request.POST, instance=donor)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Profile updated successfully!")
+            return redirect('donor_profile')
+    else:
+        form = DonorProfileForm(instance=donor)
+
+    return render(request, 'manageprofile.html', {'form': form})
 
 def view_campaign(request):
     query = request.GET.get('q', '')  # Get the search query from the URL
@@ -336,3 +376,99 @@ def admin_logout(request):
     return redirect("adminlogin")
 
 
+@login_required
+def feedback(request):
+    if request.method == "POST":
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            feedback = form.save(commit=False)
+            feedback.user = request.user
+            feedback.save()
+            messages.success(request, "Your feedback has been submitted successfully!")
+            return redirect('feedback_success')  # Redirect to feedback success page
+    else:
+        form = FeedbackForm()
+
+    return render(request, 'feedback.html', {'form': form})
+
+@login_required
+def viewfeedback(request):
+    if not request.user.is_superuser:  # Only admin can view
+        return redirect('home')
+
+    feedbacks = Feedback.objects.all().order_by('-created_at')
+    return render(request, 'viewfeedback.html', {'feedbacks': feedbacks})
+
+def feedback_success(request):
+    return render(request, 'feedback_success.html')
+
+@login_required
+def submit_complaint(request):
+    if request.method == "POST":
+        form = ComplaintForm(request.POST)
+        if form.is_valid():
+            complaint = form.save(commit=False)
+            complaint.user = request.user
+
+            # Set user_type correctly
+            if request.user.groups.filter(name='Donor').exists():
+                complaint.user_type = 'donor'
+            elif request.user.groups.filter(name='Organization').exists():
+                complaint.user_type = 'organization'
+            else:
+                complaint.user_type = 'donor'  # Default to donor if no group found
+
+            complaint.save()
+            messages.success(request, "Your complaint has been submitted successfully!")
+            return redirect('complaint_list')
+
+    else:
+        form = ComplaintForm()
+
+    return render(request, 'submit_complaint.html', {'form': form})
+
+@login_required
+def complaint_list(request):
+    """Show complaints submitted by the logged-in user."""
+    complaints = Complaint.objects.filter(user=request.user)
+    return render(request, 'complaint_list.html', {'complaints': complaints})
+@login_required
+def admin_complaints(request):
+    if not request.user.is_superuser:
+        messages.warning(request, "You do not have permission to access this page.")
+        return redirect('donor')
+
+    # Fetch complaints and log the output
+    complaints = Complaint.objects.all().order_by('-created_at')
+
+    # Debugging: Print complaints to console
+    print(f"Admin Complaints - Total Complaints: {complaints.count()}")
+    for complaint in complaints:
+        print(f"Complaint ID: {complaint.id}, User: {complaint.user.username}, UserType: {complaint.user_type}, Subject: {complaint.subject}, Status: {complaint.status}")
+
+    return render(request, 'admin_complaints.html', {'complaints': complaints})
+
+@login_required
+def respond_complaint(request, complaint_id):
+    """Allow admin to respond to complaints."""
+    if not request.user.is_superuser:
+        return redirect('donor')
+
+    complaint = get_object_or_404(Complaint, id=complaint_id)
+
+    if request.method == "POST":
+        response = request.POST.get("response")
+        complaint.response = response
+        complaint.status = True  # Mark as resolved
+        complaint.save()
+        messages.success(request, "Complaint responded successfully.")
+        return redirect('admin_complaints')
+
+    return render(request, 'respond_complaint.html', {'complaint': complaint})
+
+@csrf_exempt  # Temporarily disable CSRF for testing (not recommended in production)
+def donorlogout(request):
+    if request.method == "POST" or request.method == "GET":  # Allow GET for logout
+        logout(request)
+        return redirect('donorlogin')  # Redirect to the login page
+    return redirect('donor')  # Redirect back to donor profile if method is not allowed

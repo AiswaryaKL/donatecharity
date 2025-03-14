@@ -1,0 +1,13 @@
+
+<h2>Respond to Complaint</h2>
+<p><strong>User:</strong> {{ complaint.user.username }} ({{ complaint.user_type }})</p>
+<p><strong>Subject:</strong> {{ complaint.subject }}</p>
+<p><strong>Message:</strong> {{ complaint.message }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    <label for="response">Response:</label>
+    <textarea name="response" required>{{ complaint.response }}</textarea>
+    <button type="submit">Submit Response</button>
+</form>
+

@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import DonorRegister
 from .models import OrganizationRegister
 from .models import Organization,Campaign
-from .models import Donation,Donor
+from .models import Donation,Donor,Feedback,Complaint
 
 # Register your models here.
 class DonorRegisterAdmin(admin.ModelAdmin):
@@ -51,6 +51,20 @@ class DonorAdmin(admin.ModelAdmin):
 admin.site.register(Donor, DonorAdmin)
 
 
+class FeedbackAdmin(admin.ModelAdmin):
+    list_display = ('user', 'user_type', 'rating', 'created_at')  # Show in admin list
+    list_filter = ('user_type', 'rating', 'created_at')  # Filter options
+    search_fields = ('user__username', 'message')  # Searchable fields
+    ordering = ('-created_at',)  # Newest feedback first
+    readonly_fields = ('created_at',)  # Prevent modification of timestamp
+
+admin.site.register(Feedback, FeedbackAdmin)
+
+@admin.register(Complaint)
+class ComplaintAdmin(admin.ModelAdmin):
+    list_display = ('user', 'subject', 'status', 'created_at')
+    search_fields = ('user__username', 'subject', 'message')
+    list_filter = ('status', 'user_type')
 
 
 

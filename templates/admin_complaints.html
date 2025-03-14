@@ -1,0 +1,45 @@
+<h2>Admin Complaints</h2>
+
+<!-- Debugging: Show total complaints -->
+<p><strong>Total Complaints: {{ complaints|length }}</strong></p>
+
+{% if complaints %}
+<table border="1">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>User Type</th>
+            <th>Subject</th>
+            <th>Message</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for complaint in complaints %}
+        <tr>
+            <td>{{ complaint.user.username }}</td>
+            <td>{{ complaint.user_type }}</td>
+            <td>{{ complaint.subject }}</td>
+            <td>{{ complaint.message }}</td>
+            <td>
+                {% if complaint.status %}
+                    <span style="color: green;">Resolved</span>
+                {% else %}
+                    <span style="color: red;">Pending</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'respond_complaint' complaint.id %}">Respond</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p><strong>No complaints available.</strong></p>
+{% endif %}
+
+<!-- Debugging: Show Complaints in Raw Format -->
+<h3>Debugging: Complaints Data</h3>
+<pre>{{ complaints }}</pre>

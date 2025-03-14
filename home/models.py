@@ -81,3 +81,41 @@ class Donation(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.amount} - {self.date}"
+    
+class Feedback(models.Model):
+    USER_TYPES = [
+        ('donor', 'Donor'),
+        ('organization', 'Organization'),
+    ]
+
+    RATING_CHOICES = [(i, f"{i} ⭐") for i in range(1, 6)]  # 1 to 5 stars
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user_type = models.CharField(max_length=20, choices=USER_TYPES)
+    message = models.TextField()
+    rating = models.IntegerField(choices=RATING_CHOICES, default=5)  # Default 5 stars
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} ({self.user_type}) - {self.rating} Stars - {self.created_at}"
+
+
+class Complaint(models.Model):
+    USER_TYPES = [
+        ('donor', 'Donor'),
+        ('organization', 'Organization'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user_type = models.CharField(max_length=20, choices=USER_TYPES)
+    subject = models.CharField(max_length=255)
+    message = models.TextField()
+    response = models.TextField(blank=True, null=True)
+    status = models.BooleanField(default=False)  # False means not responded yet
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.subject}"
+    
+

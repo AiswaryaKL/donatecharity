@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Feedback</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to right, #ff758c, #ff7eb3);
+            font-family: 'Poppins', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .feedback-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        h2 {
+            color: #ff4b5c;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .form-control {
+            border-radius: 10px;
+            padding: 12px;
+        }
+        .btn-submit {
+            background: #28a745;
+            color: white;
+            border-radius: 30px;
+            padding: 12px 20px;
+            font-size: 16px;
+            transition: all 0.3s ease-in-out;
+            display: inline-block;
+            width: 100%;
+            border: none;
+        }
+        .btn-submit:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+        .alert {
+            border-radius: 10px;
+            font-weight: bold;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Star Rating */
+        .rating {
+            display: flex;
+            justify-content: center;
+            direction: rtl; /* Right to left for proper selection */
+            font-size: 30px;
+        }
+        .rating label {
+            cursor: pointer;
+            color: #ddd;
+            transition: color 0.3s;
+        }
+        .rating input {
+            display: none;
+        }
+        .rating input:checked ~ label,
+        .rating label:hover,
+        .rating label:hover ~ label {
+            color: #ffcc00;
+        }
+    </style>
+</head>
+<body>
+
+<div class="feedback-card">
+    <h2>✨ Submit Your Feedback ✨</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Other Form Fields -->
+        <div class="mb-3">
+            {{ form.non_field_errors }}
+            {% for field in form %}
+                {% if field.name != "rating" %} {# Exclude rating from as_p #}
+                    <div class="mb-3">
+                        {{ field.label_tag }} {{ field }}
+                        <div class="text-danger">{{ field.errors }}</div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- Star Rating -->
+        <div class="mb-3">
+            <label class="form-label"><strong>⭐ Rate Us</strong></label>
+            <div class="rating">
+                <input type="radio" name="rating" id="star5" value="5"><label for="star5">★</label>
+                <input type="radio" name="rating" id="star4" value="4"><label for="star4">★</label>
+                <input type="radio" name="rating" id="star3" value="3"><label for="star3">★</label>
+                <input type="radio" name="rating" id="star2" value="2"><label for="star2">★</label>
+                <input type="radio" name="rating" id="star1" value="1"><label for="star1">★</label>
+            </div>
+            <input type="hidden" name="rating" id="rating-value">
+        </div>
+
+        <button type="submit" class="btn-submit">🚀 Submit Feedback</button>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const stars = document.querySelectorAll(".rating input");
+        const ratingValue = document.getElementById("rating-value");
+
+        stars.forEach(star => {
+            star.addEventListener("change", function () {
+                ratingValue.value = this.value;  // Store selected rating
+                stars.forEach(s => s.nextElementSibling.style.color = "#ddd");
+                let selected = this;
+                while (selected) {
+                    selected.nextElementSibling.style.color = "#ffcc00";
+                    selected = selected.previousElementSibling;
+                }
+            });
+        });
+
+        // Pre-select stars if form is reloaded
+        let savedRating = ratingValue.value || document.querySelector(".rating input:checked")?.value;
+        if (savedRating) {
+            let selectedStar = document.getElementById(`star${savedRating}`);
+            if (selectedStar) {
+                selectedStar.checked = true;
+                selectedStar.dispatchEvent(new Event("change"));
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
