@@ -33,11 +33,13 @@ urlpatterns = [
     path('feedback/', views.feedback, name='feedback'),
     path('viewfeedback/', views.viewfeedback, name='viewfeedback'),
     path('feedback_success', views.feedback_success, name='feedback_success'),
-    path('complaint/', views.submit_complaint, name='submit_complaint'),
-    path('complaints/', views.complaint_list, name='complaint_list'),
-    path('complaints/', views.admin_complaints, name='admin_complaints'),
+     path('submit/', views.submit_complaint, name='submit_complaint'),
+    path('list/', views.complaint_list, name='complaint_list'),
+    path('admin/', views.admin_complaints, name='admin_complaints'),  # Ensure correct mapping
     path('respond/<int:complaint_id>/', views.respond_complaint, name='respond_complaint'),
     path('logout/', views.donorlogout, name='donorlogout'),
-    
-
+    path("edit/<int:campaign_id>/", views.edit_campaign, name="edit_campaign"),
+    path('donations/', views.track_donations, name='track_donations'),
+    path('organizationlogout/', views.organizationlogout, name='organizationlogout'),
+    path('organization_donations/', views.organization_donations, name='organization_donations'),
 ]

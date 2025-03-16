@@ -27,13 +27,19 @@ class OrganizationAdmin(admin.ModelAdmin):
     ordering = ("name",)  # Default ordering by name
 
 
-
 @admin.register(Campaign)
 class CampaignAdmin(admin.ModelAdmin):
-    list_display = ("title", "organization", "goal_amount", "end_date", "created_at")  # Display these columns
-    search_fields = ("title", "organization__name")  # Allow search by title and organization name
-    list_filter = ("end_date", "organization")  # Filter campaigns by end date and organization
-    date_hierarchy = "end_date"  # Adds a date-based navigation bar
+    list_display = ("title", "organization", "goal_amount", "end_date", "created_by", "created_at")
+    search_fields = ("title", "organization__name", "created_by__username")
+    list_filter = ("organization", "created_by", "end_date")
+    ordering = ("-created_at",)  # Show newest campaigns first
+
+    # Auto-assign logged-in user as created_by
+    def save_model(self, request, obj, form, change):
+        if not obj.created_by:
+            obj.created_by = request.user
+        obj.save()
+
 
 @admin.register(Donation)
 class DonationAdmin(admin.ModelAdmin):

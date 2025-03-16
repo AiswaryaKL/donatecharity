@@ -89,8 +89,10 @@
         <div class="profile-info"><strong>Phone:</strong> {{ donor.phone }}</div>
         <div class="profile-info"><strong>Address:</strong> {{ donor.address }}</div>
         <div class="profile-info"><strong>Date of Birth:</strong> {{ donor.date_of_birth|date:'Y-m-d' }}</div>
+        
+        <!-- Updated Total Donations Section -->
         <div class="profile-info"><strong>Total Donations:</strong> 
-            <span class="badge-custom">{{ donor.total_donations }}</span>
+            <span class="badge-custom">{{ total_donations|default:"0" }}</span>
         </div>
 
         <a href="{% url 'manageprofile' %}">

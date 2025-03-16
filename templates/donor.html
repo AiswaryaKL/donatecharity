@@ -200,7 +200,7 @@
             <a href="{% url 'view_campaign' %}"><i class="fas fa-search"></i> View Campaigns</a>
             <a href="{% url 'feedback' %}"><i class="fas fa-comment-alt"></i> Add Feedback</a>
             <a href="{% url 'submit_complaint' %}"><i class="fas fa-exclamation-circle"></i> Send Complaint</a>
-           
+            <a href="{% url 'complaint_list' %}"><i class="fas fa-info-circle"></i> Complaint Status</a>
             <a href="{% url 'donationhistory' %}"><i class="fas fa-history"></i> Donation History</a>
             <form action="{% url 'donorlogout' %}" method="post" style="display: inline;">
                 {% csrf_token %}

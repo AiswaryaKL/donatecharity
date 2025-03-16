@@ -60,12 +60,17 @@ class Organization(models.Model):
 
 # ✅ Campaign Model (Newly Added)
 class Campaign(models.Model):
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="campaigns")  # Linking to Organization
+    organization = models.ForeignKey(
+        "Organization", on_delete=models.CASCADE, related_name="campaigns"
+    )  
     title = models.CharField(max_length=255)
     description = models.TextField()
     goal_amount = models.DecimalField(max_digits=10, decimal_places=2)
     end_date = models.DateField()
     image = models.ImageField(upload_to="campaign_images/", blank=True, null=True)
+    created_by = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="campaigns", null=True, blank=True
+    )  # Temporarily allow null values
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

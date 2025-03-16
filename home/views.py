@@ -9,6 +9,8 @@ from .forms import FeedbackForm
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.conf import settings
+from django.db.models import Sum 
+from django.contrib.admin.views.decorators import staff_member_required
 from .models import Complaint
 from .forms import ComplaintForm
 from .models import DonorRegister
@@ -167,7 +169,6 @@ def donor(request):
     campaigns = Campaign.objects.all()
     print(campaigns)  # Debugging: See if campaigns are fetched
     return render(request, 'donor.html', {'campaigns': campaigns})
-
 @login_required
 def donor_profile(request):
     user = request.user
@@ -178,7 +179,11 @@ def donor_profile(request):
     if not donor:
         return render(request, 'donor_profile.html', {'error': "No donor profile found!"})
 
-    return render(request, 'donor_profile.html', {'donor': donor})
+    # ✅ Get the number of donations made by the donor
+    total_donations = Donation.objects.filter(user=user).count()
+
+    return render(request, 'donor_profile.html', {'donor': donor, 'total_donations': total_donations})
+
 @login_required
 def manageprofile(request):
     user = request.user
@@ -319,6 +324,7 @@ def org_editprofile(request):
 
 
 
+@login_required
 def create_campaign(request):
     if request.method == "POST":
         form = CampaignForm(request.POST, request.FILES)
@@ -328,21 +334,39 @@ def create_campaign(request):
 
             # Ensure user has an organization before assigning
             if hasattr(request.user, "organization"):
-                campaign.organization = request.user.organization  # Assign org
-                campaign.save()
+                campaign.organization = request.user.organization  # Assign organization
+                campaign.created_by = request.user  # Assign campaign creator
+                campaign.save()  # Now save it
+
                 messages.success(request, "Campaign successfully created! 🚀")
                 return redirect("campaign_list")  # Redirect after saving
             else:
-                form.add_error(None, "You are not associated with any organization.")
+                messages.error(request, "You are not associated with any organization.")
+                return redirect("create_campaign")  # Redirect back to form
 
     else:
         form = CampaignForm()
 
     return render(request, "create_campaign.html", {"form": form})
 
+@login_required
 def campaign_list(request):
-    campaigns = Campaign.objects.all()
+    campaigns = Campaign.objects.filter(created_by=request.user)  # Only show user's campaigns
     return render(request, "campaign_list.html", {"campaigns": campaigns})
+
+@login_required
+def edit_campaign(request, campaign_id):
+    campaign = get_object_or_404(Campaign, id=campaign_id, created_by=request.user)
+
+    if request.method == "POST":
+        form = CampaignForm(request.POST, request.FILES, instance=campaign)
+        if form.is_valid():
+            form.save()
+            return redirect("campaign_list")
+    else:
+        form = CampaignForm(instance=campaign)
+
+    return render(request, "edit_campaign.html", {"form": form, "campaign": campaign})
 
 
 
@@ -404,22 +428,23 @@ def feedback_success(request):
 
 @login_required
 def submit_complaint(request):
+    """Allow users (donors/organizations) to submit complaints."""
     if request.method == "POST":
         form = ComplaintForm(request.POST)
         if form.is_valid():
             complaint = form.save(commit=False)
             complaint.user = request.user
 
-            # Set user_type correctly
+            # Assign user type correctly
             if request.user.groups.filter(name='Donor').exists():
                 complaint.user_type = 'donor'
             elif request.user.groups.filter(name='Organization').exists():
                 complaint.user_type = 'organization'
             else:
-                complaint.user_type = 'donor'  # Default to donor if no group found
+                complaint.user_type = 'donor'  # Default
 
             complaint.save()
-            messages.success(request, "Your complaint has been submitted successfully!")
+            messages.success(request, "Complaint submitted successfully.")
             return redirect('complaint_list')
 
     else:
@@ -427,30 +452,38 @@ def submit_complaint(request):
 
     return render(request, 'submit_complaint.html', {'form': form})
 
+
 @login_required
 def complaint_list(request):
     """Show complaints submitted by the logged-in user."""
-    complaints = Complaint.objects.filter(user=request.user)
+    complaints = Complaint.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'complaint_list.html', {'complaints': complaints})
+
 @login_required
 def admin_complaints(request):
+    """Admin view to see all complaints from donors and organizations."""
     if not request.user.is_superuser:
         messages.warning(request, "You do not have permission to access this page.")
         return redirect('donor')
 
-    # Fetch complaints and log the output
-    complaints = Complaint.objects.all().order_by('-created_at')
+    # Fetch all complaints along with user details
+    complaints = Complaint.objects.select_related('user').all().order_by('-created_at')
 
-    # Debugging: Print complaints to console
-    print(f"Admin Complaints - Total Complaints: {complaints.count()}")
+    # Correctly determine user type
     for complaint in complaints:
-        print(f"Complaint ID: {complaint.id}, User: {complaint.user.username}, UserType: {complaint.user_type}, Subject: {complaint.subject}, Status: {complaint.status}")
+        if hasattr(complaint.user, 'user_type'):  # Ensure the user has a user_type field
+            complaint.user_type_display = (
+                "Organization" if complaint.user.user_type.lower() == "organization" else "Donor"
+            )
+        else:
+            complaint.user_type_display = "Unknown"
 
     return render(request, 'admin_complaints.html', {'complaints': complaints})
 
+
 @login_required
 def respond_complaint(request, complaint_id):
-    """Allow admin to respond to complaints."""
+    """Allow admin to respond to a complaint."""
     if not request.user.is_superuser:
         return redirect('donor')
 
@@ -472,3 +505,42 @@ def donorlogout(request):
         logout(request)
         return redirect('donorlogin')  # Redirect to the login page
     return redirect('donor')  # Redirect back to donor profile if method is not allowed
+
+@staff_member_required  # Restricts access to admins only
+def track_donations(request):
+    donations = Donation.objects.all().order_by('-date')
+
+    # Filtering donations based on user input
+    donor_name = request.GET.get('donor_name', '')
+    if donor_name:
+        donations = donations.filter(user__username__icontains=donor_name)
+
+    campaign_name = request.GET.get('campaign_name', '')
+    if campaign_name:
+        donations = donations.filter(campaign__title__icontains=campaign_name)
+
+    return render(request, 'track_donations.html', {'donations': donations}) 
+
+@csrf_exempt  # Temporarily disable CSRF for testing (not recommended in production)
+def organizationlogout(request):
+    if request.method == "POST" or request.method == "GET":  # Allow GET for logout
+        logout(request)
+        return redirect('organizatiologin')  # Redirect to the login page
+    return redirect('organization')  # Redirect back to donor profile if method is not allowed
+
+@login_required
+def organization_donations(request):
+    """Fetch donations for campaigns owned by the logged-in organization."""
+    organization = request.user.organization  # Assuming User is linked to Organization
+
+    # Get all campaigns belonging to the organization
+    campaigns = Campaign.objects.filter(organization=organization)
+
+    # Get all donations for these campaigns
+    donations = Donation.objects.filter(campaign__in=campaigns).order_by('-date')
+
+    context = {
+        "donations": donations,
+        "organization": organization
+    }
+    return render(request, "organization_donations.html", context)

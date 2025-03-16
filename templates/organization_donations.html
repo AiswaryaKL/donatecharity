@@ -1,0 +1,101 @@
+
+
+<style>
+/* General Styling */
+.container {
+    width: 80%;
+    margin: auto;
+    text-align: center;
+}
+
+.title {
+    font-size: 2rem;
+    color: #fff;
+    background: linear-gradient(45deg, #4CAF50, #2196F3);
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    animation: fadeIn 1s ease-in-out;
+}
+
+/* Donations Table */
+.table-container {
+    overflow-x: auto;
+}
+
+.donation-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    animation: slideUp 1s ease-in-out;
+}
+
+.donation-table th, .donation-table td {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+.donation-table th {
+    background: #03a9f4;
+    color: #fff;
+    font-weight: bold;
+}
+
+.donation-table tr:nth-child(even) {
+    background: #f2f2f2;
+}
+
+.donation-table tr:hover {
+    background: #ffeb3b;
+    transition: 0.3s;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 1s ease-in-out;
+}
+</style>
+
+<div class="container">
+    <h2 class="title">{{ organization.name }} - Donations</h2>
+
+    <div class="table-container">
+        <table class="donation-table">
+            <thead>
+                <tr>
+                    <th>Campaign</th>
+                    <th>Amount</th>
+                    <th>Payment ID</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for donation in donations %}
+                <tr class="fade-in">
+                    <td>{{ donation.campaign.title }}</td>
+                    <td>${{ donation.amount }}</td>
+                    <td>{{ donation.payment_id }}</td>
+                    <td>{{ donation.date }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4">No donations found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+

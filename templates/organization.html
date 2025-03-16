@@ -199,13 +199,19 @@
             
             <a href="{% url 'org_profile' %}"><i class="fas fa-user-cog"></i> Manage Profile</a>
             <a href="{% url 'create_campaign' %}"><i class="fas fa-bullhorn"></i> Create Campaign</a>
-            <a href="#view-allocate"><i class="fas fa-hand-holding-usd"></i> View Donations</a>
+            <a href="{% url 'organization_donations' %}"><i class="fas fa-hand-holding-usd"></i> View Donations</a>
             <a href="{% url 'campaign_list' %}"><i class="fas fa-edit"></i> view created campaigns</a>
             
            
             <a href="{% url 'submit_complaint' %}"><i class="fas fa-exclamation-circle"></i> Send Complaints</a>
+            <a href="{% url 'complaint_list' %}"><i class="fas fa-info-circle"></i> Complaint Status</a>
             <a href="{% url 'feedback' %}"><i class="fas fa-comment-alt"></i> Add Feedback</a>
-            <a href="" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <form action="{% url 'donorlogout' %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </form>
         </div>
     </nav>
 
