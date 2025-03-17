@@ -123,4 +123,17 @@ class Complaint(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.subject}"
     
+class CharityReport(models.Model):
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="charity_reports")
+    total_donations = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    num_donors = models.IntegerField(default=0)
+    num_campaigns = models.IntegerField(default=0)
+    month = models.IntegerField()  # Stores the month number (1-12)
+    year = models.IntegerField()  # Stores the year
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = ('organization', 'month', 'year')  # Ensure only one report per month per organization
+
+    def __str__(self):
+        return f"Report for {self.organization.name} - {self.month}/{self.year}"

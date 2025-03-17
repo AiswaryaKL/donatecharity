@@ -1,39 +1,79 @@
-{% extends 'donor.html' %}
 
-{% block content %}
+  <style>
+    /* Custom Styles */
+    .charity-container {
+      background: linear-gradient(to right, #ff7e5f, #feb47b);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    .charity-title {
+      text-align: center;
+      font-weight: bold;
+      font-size: 28px;
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .report-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 15px 0;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .report-card:hover {
+      transform: scale(1.03);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .view-btn {
+      background: #28a745;
+      border: none;
+      transition: background 0.3s, transform 0.3s;
+    }
+
+    .view-btn:hover {
+      background: #218838;
+      transform: scale(1.1);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+
   <div class="container mt-4">
-    <h2>View Charity Reports</h2>
+    <div class="charity-container">
+      <h2 class="charity-title">🌟 Charity Reports 🌟</h2>
 
-    <!-- Check if reports are available -->
-    {% if reports %}
-      <div class="table-responsive">
-        <table class="table table-bordered">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Report Title</th>
-              <th>Description</th>
-              <th>Date</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for report in reports %}
-              <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ report.title }}</td>
-                <td>{{ report.description }}</td>
-                <td>{{ report.date }}</td>
-                <td>
-                  <a href="{{ report.get_absolute_url }}" class="btn btn-primary btn-sm">View Report</a>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <p>No reports available at the moment.</p>
-    {% endif %}
+      {% if reports %}
+        <div class="row">
+          {% for report in reports %}
+            <div class="col-md-6">
+              <div class="report-card">
+                <h4>{{ report.title }}</h4>
+                <p><strong>Date:</strong> {{ report.date }}</p>
+                <p>{{ report.description|truncatewords:20 }}</p>
+                <a href="{{ report.get_absolute_url }}" class="btn view-btn btn-sm">View Report</a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-white text-center">No reports available at the moment.</p>
+      {% endif %}
+    </div>
   </div>
-{% endblock %}
+

@@ -42,4 +42,7 @@ urlpatterns = [
     path('donations/', views.track_donations, name='track_donations'),
     path('organizationlogout/', views.organizationlogout, name='organizationlogout'),
     path('organization_donations/', views.organization_donations, name='organization_donations'),
+    path('charity-report/', views.charity_report, name="charity_report"),
+
+
 ]

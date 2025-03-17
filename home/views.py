@@ -6,10 +6,11 @@ import razorpay
 from .forms import DonorProfileForm
 from .models import Feedback
 from .forms import FeedbackForm
+from django.utils.timezone import now
+from django.db.models import Sum, Count
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.conf import settings
-from django.db.models import Sum 
 from django.contrib.admin.views.decorators import staff_member_required
 from .models import Complaint
 from .forms import ComplaintForm
@@ -25,7 +26,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .forms import OrganizationForm
 from .models import Organization
-from .models import Campaign,Donation,Donor
+from .models import Campaign,Donation,Donor,CharityReport
 from .forms import CampaignForm 
 
 
@@ -544,3 +545,58 @@ def organization_donations(request):
         "organization": organization
     }
     return render(request, "organization_donations.html", context)
+
+
+from django.shortcuts import render
+from django.utils.timezone import now
+from django.db.models import Sum
+from .models import Organization, Campaign, Donation, CharityReport
+
+def charity_report(request):
+    current_month = now().month  # Get current month
+    current_year = now().year  # Get current year
+
+    organizations = Organization.objects.all()
+    reports = []
+
+    for org in organizations:
+        total_donations = Donation.objects.filter(
+            campaign__organization=org,
+            date__year=current_year,
+            date__month=current_month
+        ).aggregate(total=Sum('amount'))['total'] or 0.00
+
+        num_donors = Donation.objects.filter(
+            campaign__organization=org,
+            date__year=current_year,
+            date__month=current_month
+        ).values('user').distinct().count()
+
+        num_campaigns = Campaign.objects.filter(
+            organization=org,
+            created_at__year=current_year,
+            created_at__month=current_month
+        ).count()
+
+        # ✅ Check if a report already exists to prevent duplicates
+        report, created = CharityReport.objects.get_or_create(
+            organization=org,
+            month=current_month,
+            year=current_year,
+            defaults={
+                'total_donations': total_donations,
+                'num_donors': num_donors,
+                'num_campaigns': num_campaigns
+            }
+        )
+
+        # If the report exists, update the values
+        if not created:
+            report.total_donations = total_donations
+            report.num_donors = num_donors
+            report.num_campaigns = num_campaigns
+            report.save()
+
+        reports.append(report)
+
+    return render(request, 'charity_report.html', {'reports': reports})

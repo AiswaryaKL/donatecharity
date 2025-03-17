@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import DonorRegister
 from .models import OrganizationRegister
 from .models import Organization,Campaign
-from .models import Donation,Donor,Feedback,Complaint
+from .models import Donation,Donor,Feedback,Complaint,CharityReport
 
 # Register your models here.
 class DonorRegisterAdmin(admin.ModelAdmin):
@@ -71,6 +71,13 @@ class ComplaintAdmin(admin.ModelAdmin):
     list_display = ('user', 'subject', 'status', 'created_at')
     search_fields = ('user__username', 'subject', 'message')
     list_filter = ('status', 'user_type')
+
+@admin.register(CharityReport)
+class CharityReportAdmin(admin.ModelAdmin):
+    list_display = ('organization', 'total_donations', 'num_donors', 'num_campaigns', 'month', 'year', 'created_at')
+    list_filter = ('month', 'year', 'organization')
+    search_fields = ('organization__name', 'year', 'month')
+    ordering = ('-year', '-month')
 
 
 
