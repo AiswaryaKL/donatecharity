@@ -8,7 +8,7 @@
     <style>
         /* Full-Screen Gradient Background */
         body {
-            background: linear-gradient(135deg, #ff7eb3, #ff758c); /* Same as Donor Profile */
+            background: linear-gradient(135deg, #ff7eb3, #ff758c);
             height: 100vh;
             display: flex;
             justify-content: center;
@@ -40,7 +40,7 @@
             font-weight: bold;
             text-transform: uppercase;
             text-align: center;
-            background: linear-gradient(135deg,rgb(59, 38, 109), #ff7eb3); /* Gradient Heading */
+            background: linear-gradient(135deg, rgb(59, 38, 109), #ff7eb3);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 20px;
@@ -70,6 +70,13 @@
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
         }
 
+        /* Error Messages */
+        .error-msg {
+            color: #ff0000;
+            font-size: 0.875rem;
+            margin-top: 5px;
+        }
+
         /* Save Button */
         .save-btn {
             width: 100%;
@@ -88,34 +95,72 @@
             background: linear-gradient(135deg, #ff5e78, #ff8fa3);
         }
 
+        /* Message Styling */
+        .alert-container {
+            text-align: center;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
 
     <div class="edit-profile-card">
         <h2 class="edit-title">Edit Donor Profile</h2>
+
+        <!-- ✅ Display Success or Error Messages -->
+        {% if messages %}
+            <div class="alert-container">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <form method="post">
             {% csrf_token %}
             <div class="mb-3">
                 <label class="form-label">Name:</label>
                 <input type="text" class="form-control" name="name" value="{{ form.name.value }}" required>
+                {% if form.name.errors %}
+                    <div class="error-msg">{{ form.name.errors.0 }}</div>
+                {% endif %}
             </div>
+
             <div class="mb-3">
                 <label class="form-label">Email:</label>
                 <input type="email" class="form-control" name="email" value="{{ form.email.value }}" readonly>
+                {% if form.email.errors %}
+                    <div class="error-msg">{{ form.email.errors.0 }}</div>
+                {% endif %}
             </div>
+
             <div class="mb-3">
                 <label class="form-label">Phone:</label>
                 <input type="text" class="form-control" name="phone" value="{{ form.phone.value }}" required>
+                {% if form.phone.errors %}
+                    <div class="error-msg">{{ form.phone.errors.0 }}</div>
+                {% endif %}
             </div>
+
             <div class="mb-3">
                 <label class="form-label">Address:</label>
                 <input type="text" class="form-control" name="address" value="{{ form.address.value }}" required>
+                {% if form.address.errors %}
+                    <div class="error-msg">{{ form.address.errors.0 }}</div>
+                {% endif %}
             </div>
+
             <div class="mb-3">
                 <label class="form-label">Date of Birth:</label>
-                <input type="date" class="form-control" name="date_of_birth" value="{{ form.date_of_birth.value|date:'Y-m-d' }}" required>
+                <input type="date" class="form-control" name="date_of_birth" 
+                       value="{{ form.date_of_birth.value|date:'Y-m-d' }}" required>
+                {% if form.date_of_birth.errors %}
+                    <div class="error-msg">{{ form.date_of_birth.errors.0 }}</div>
+                {% endif %}
             </div>
+
             <button type="submit" class="save-btn">Save Changes</button>
         </form>
     </div>

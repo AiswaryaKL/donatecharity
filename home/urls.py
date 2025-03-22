@@ -30,11 +30,9 @@ urlpatterns = [
     path('admindashboard/', views.admindashboard, name='admindashboard'),
     path('org_editprofile/', views.org_editprofile, name='org_editprofile'),
     path('payment-success/', views.payment_success, name='payment_success'),
-    path('feedback/', views.feedback, name='feedback'),
     path('viewfeedback/', views.viewfeedback, name='viewfeedback'),
     path('feedback_success', views.feedback_success, name='feedback_success'),
-     path('submit/', views.submit_complaint, name='submit_complaint'),
-    path('list/', views.complaint_list, name='complaint_list'),
+    path('donorfeedback_success', views.donorfeedback_success, name='donorfeedback_success'),
     path('admin/', views.admin_complaints, name='admin_complaints'),  # Ensure correct mapping
     path('respond/<int:complaint_id>/', views.respond_complaint, name='respond_complaint'),
     path('logout/', views.donorlogout, name='donorlogout'),
@@ -43,6 +41,12 @@ urlpatterns = [
     path('organizationlogout/', views.organizationlogout, name='organizationlogout'),
     path('organization_donations/', views.organization_donations, name='organization_donations'),
     path('charity-report/', views.charity_report, name="charity_report"),
+    path('donor_feedback/', views.donor_feedback, name='donor_feedback'),
+    path('organization_feedback/', views.organization_feedback, name='organization_feedback'),
+    path('submit_donor_complaint/', views.submit_donor_complaint, name='submit_donor_complaint'),
+    path('donor_complaint_list/', views.donor_complaint_list, name='donor_complaint_list'),
+    path('submit_org_complaint/', views.submit_org_complaint, name='submit_org_complaint'),
+    path('org_complaint_list/', views.org_complaint_list, name='org_complaint_list'),
 
 
 ]

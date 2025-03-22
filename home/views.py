@@ -5,7 +5,7 @@ from django.contrib import messages
 import razorpay
 from .forms import DonorProfileForm
 from .models import Feedback
-from .forms import FeedbackForm
+from .forms import DonorFeedbackForm, OrganizationFeedbackForm
 from django.utils.timezone import now
 from django.db.models import Sum, Count
 from django.contrib.auth.models import User
@@ -200,8 +200,10 @@ def manageprofile(request):
         form = DonorProfileForm(request.POST, instance=donor)
         if form.is_valid():
             form.save()
-            messages.success(request, "Profile updated successfully!")
-            return redirect('donor_profile')
+            messages.success(request, "")
+            return redirect('donor_profile')  # ✅ Redirect to donor_profile page
+        else:
+            messages.error(request, "Please correct the errors below.")
     else:
         form = DonorProfileForm(instance=donor)
 
@@ -315,7 +317,7 @@ def org_editprofile(request):
             organization.id_proof = request.FILES["id_proof"]
 
         organization.save()
-        messages.success(request, "Profile updated successfully!")
+        messages.success(request, "")
         return redirect("org_profile")
 
     return render(request, "org_editprofile.html", {
@@ -398,23 +400,43 @@ def admindashboard(request):
 @login_required
 def admin_logout(request):
     logout(request)
-    return redirect("adminlogin")
+    return redirect("home")
 
 
-@login_required
-def feedback(request):
-    if request.method == "POST":
-        form = FeedbackForm(request.POST)
+def donor_feedback(request):
+    if request.method == 'POST':
+        form = DonorFeedbackForm(request.POST)
         if form.is_valid():
             feedback = form.save(commit=False)
             feedback.user = request.user
+            feedback.user_type = 'donor'
             feedback.save()
-            messages.success(request, "Your feedback has been submitted successfully!")
-            return redirect('feedback_success')  # Redirect to feedback success page
+            messages.success(request, "")
+            return redirect('donorfeedback_success')  # Redirect to feedback success page
     else:
-        form = FeedbackForm()
+        form = DonorFeedbackForm()
+    return render(request, 'donor_feedback.html', {'form': form})
 
-    return render(request, 'feedback.html', {'form': form})
+
+def donorfeedback_success(request):
+    return render(request, 'donorfeedback_success.html')
+
+def organization_feedback(request):
+    if request.method == 'POST':
+        form = OrganizationFeedbackForm(request.POST)
+        if form.is_valid():
+            feedback = form.save(commit=False)
+            feedback.user = request.user
+            feedback.user_type = 'organization'
+            feedback.save()
+            messages.success(request, "")
+            return redirect('feedback_success')  # Redirecting to feedback success page
+    else:
+        form = OrganizationFeedbackForm()
+    return render(request, 'organization_feedback.html', {'form': form})
+
+
+
 
 @login_required
 def viewfeedback(request):
@@ -428,37 +450,50 @@ def feedback_success(request):
     return render(request, 'feedback_success.html')
 
 @login_required
-def submit_complaint(request):
-    """Allow users (donors/organizations) to submit complaints."""
+def submit_donor_complaint(request):
     if request.method == "POST":
         form = ComplaintForm(request.POST)
         if form.is_valid():
             complaint = form.save(commit=False)
             complaint.user = request.user
-
-            # Assign user type correctly
-            if request.user.groups.filter(name='Donor').exists():
-                complaint.user_type = 'donor'
-            elif request.user.groups.filter(name='Organization').exists():
-                complaint.user_type = 'organization'
-            else:
-                complaint.user_type = 'donor'  # Default
-
+            complaint.user_type = 'donor'
             complaint.save()
-            messages.success(request, "Complaint submitted successfully.")
-            return redirect('complaint_list')
-
+            messages.success(request, "")
+            return redirect('donor_complaint_list')
     else:
         form = ComplaintForm()
+    return render(request, 'submit_donor_complaint.html', {'form': form})
 
-    return render(request, 'submit_complaint.html', {'form': form})
+@login_required
+def donor_complaint_list(request):
+    complaints = Complaint.objects.filter(user=request.user, user_type='donor').order_by('-created_at')
+    return render(request, 'donor_complaint_list.html', {'complaints': complaints})
 
 
 @login_required
-def complaint_list(request):
-    """Show complaints submitted by the logged-in user."""
-    complaints = Complaint.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'complaint_list.html', {'complaints': complaints})
+def submit_org_complaint(request):
+    if request.method == "POST":
+        form = ComplaintForm(request.POST)
+        if form.is_valid():
+            complaint = form.save(commit=False)
+            complaint.user = request.user
+            complaint.user_type = 'organization'
+            complaint.save()
+            messages.success(request, "")
+            return redirect('org_complaint_list')
+        else:
+            messages.error(request, "There was an error submitting the complaint. Please check the form.")
+    else:
+        form = ComplaintForm()
+
+    return render(request, 'submit_org_complaint.html', {'form': form})
+
+
+@login_required
+def org_complaint_list(request):
+    complaints = Complaint.objects.filter(user=request.user, user_type='organization').order_by('-created_at')
+    return render(request, 'org_complaint_list.html', {'complaints': complaints})
+
 
 @login_required
 def admin_complaints(request):
@@ -495,7 +530,7 @@ def respond_complaint(request, complaint_id):
         complaint.response = response
         complaint.status = True  # Mark as resolved
         complaint.save()
-        messages.success(request, "Complaint responded successfully.")
+        messages.success(request, "")
         return redirect('admin_complaints')
 
     return render(request, 'respond_complaint.html', {'complaint': complaint})

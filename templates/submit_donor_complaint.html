@@ -1,0 +1,180 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Submit Donor Complaint</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  
+  <style>
+    body {
+      background: linear-gradient(135deg, #f6d365, #fda085);
+      font-family: 'Poppins', sans-serif;
+      margin-top: 80px;
+    }
+
+    /* Navbar */
+    .navbar {
+      background-color: rgba(44, 62, 80, 0.9);
+      padding: 15px 0;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .link-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .link-container a,
+    .btn-logout {
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      padding: 12px 20px;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+    }
+
+    .link-container a:hover,
+    .btn-logout:hover {
+      background-color: #16a085;
+    }
+
+    .btn-logout {
+      background-color: #e74c3c;
+    }
+
+    .btn-logout:hover {
+      background-color: #c0392b;
+    }
+
+    /* Form Container */
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(15px);
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 600px; /* Wider form */
+      width: 90%;
+      margin-top: 30px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Form Heading */
+    h2 {
+      background: linear-gradient(135deg, #ff7e5f, #feb47b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: bold;
+      font-size: 2.5rem;
+      margin-bottom: 30px;
+    }
+
+    /* Form Fields */
+    label {
+      font-weight: 600;
+      color: #333;
+    }
+
+    input, textarea {
+      border-radius: 12px;
+      border: 2px solid #ff7e5f;
+      padding: 12px;
+      font-size: 1rem;
+      width: 100%;
+    }
+
+    input:focus, textarea:focus {
+      border-color: #feb47b;
+      box-shadow: 0 0 12px rgba(255, 126, 95, 0.5);
+    }
+
+    /* Submit Button */
+    .btn-danger {
+      background: linear-gradient(135deg, #ff758c, #ff7eb3);
+      border: none;
+      border-radius: 30px;
+      font-size: 1.2rem;
+      padding: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-danger:hover {
+      background: linear-gradient(135deg, #ff7eb3, #ff758c);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(255, 120, 140, 0.3);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="link-container">
+      <a href="{% url 'donor_profile' %}"><i class="fas fa-user-cog"></i> Manage Profile</a>
+      <a href="{% url 'view_campaign' %}"><i class="fas fa-search"></i> View Campaigns</a>
+      <a href="{% url 'donor_feedback' %}"><i class="fas fa-comment-alt"></i> Add Feedback</a>
+      <a href="{% url 'submit_donor_complaint' %}"><i class="fas fa-exclamation-circle"></i> Send Complaint</a>
+      <a href="{% url 'donor_complaint_list' %}"><i class="fas fa-info-circle"></i> Complaint Status</a>
+      <a href="{% url 'donationhistory' %}"><i class="fas fa-history"></i> Donation History</a>
+      <form action="{% url 'donorlogout' %}" method="post" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn-logout">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </form>
+    </div>
+  </nav>
+
+  <!-- Complaint Form Section -->
+  <div class="container">
+    <h2 class="text-center">📝 Submit Your Complaint</h2>
+    <form method="post">
+      {% csrf_token %}
+
+      <!-- Subject Field -->
+      <div class="mb-3">
+        {{ form.subject.label_tag }}
+        {{ form.subject }}
+        {% if form.subject.errors %}
+          <div class="text-danger">{{ form.subject.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Message Field -->
+      <div class="mb-3">
+        {{ form.message.label_tag }}
+        {{ form.message }}
+        {% if form.message.errors %}
+          <div class="text-danger">{{ form.message.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="btn btn-danger w-100">🚀 Submit Complaint</button>
+    </form>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
