@@ -26,7 +26,6 @@ urlpatterns = [
     path("campaigns/", views.campaign_list, name="campaign_list"),
     path('adminlogin/', views.adminlogin, name='adminlogin'),
     path("admin_logout/", views.admin_logout, name="admin_logout"),
-    
     path('admindashboard/', views.admindashboard, name='admindashboard'),
     path('org_editprofile/', views.org_editprofile, name='org_editprofile'),
     path('payment-success/', views.payment_success, name='payment_success'),
@@ -40,6 +39,7 @@ urlpatterns = [
     path('donations/', views.track_donations, name='track_donations'),
     path('organizationlogout/', views.organizationlogout, name='organizationlogout'),
     path('organization_donations/', views.organization_donations, name='organization_donations'),
+    path('generate-report/', views.generate_report, name="generate_report"),
     path('charity-report/', views.charity_report, name="charity_report"),
     path('donor_feedback/', views.donor_feedback, name='donor_feedback'),
     path('organization_feedback/', views.organization_feedback, name='organization_feedback'),
@@ -47,6 +47,8 @@ urlpatterns = [
     path('donor_complaint_list/', views.donor_complaint_list, name='donor_complaint_list'),
     path('submit_org_complaint/', views.submit_org_complaint, name='submit_org_complaint'),
     path('org_complaint_list/', views.org_complaint_list, name='org_complaint_list'),
+    path('verify-campaigns/', views.verify_campaigns, name='verify_campaigns'),
+    path('approve-campaigns/<int:campaign_id>/', views.approve_campaigns, name='approve_campaigns'),
 
 
 ]

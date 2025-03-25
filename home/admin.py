@@ -27,18 +27,24 @@ class OrganizationAdmin(admin.ModelAdmin):
     ordering = ("name",)  # Default ordering by name
 
 
-@admin.register(Campaign)
-class CampaignAdmin(admin.ModelAdmin):
-    list_display = ("title", "organization", "goal_amount", "end_date", "created_by", "created_at")
-    search_fields = ("title", "organization__name", "created_by__username")
-    list_filter = ("organization", "created_by", "end_date")
-    ordering = ("-created_at",)  # Show newest campaigns first
 
-    # Auto-assign logged-in user as created_by
-    def save_model(self, request, obj, form, change):
-        if not obj.created_by:
-            obj.created_by = request.user
-        obj.save()
+class CampaignAdmin(admin.ModelAdmin):
+    list_display = ('title', 'organization', 'goal_amount', 'end_date', 'verified', 'created_at')
+    list_filter = ('verified', 'end_date', 'organization')
+    search_fields = ('title', 'organization__name', 'created_by__username')
+    actions = ['approve_campaigns', 'reject_campaigns']
+
+    def approve_campaigns(self, request, queryset):
+        queryset.update(verified=True)
+        self.message_user(request, "Selected campaigns have been approved.")
+    approve_campaigns.short_description = "Approve selected campaigns"
+
+    def reject_campaigns(self, request, queryset):
+        queryset.update(verified=False)
+        self.message_user(request, "Selected campaigns have been rejected.")
+    reject_campaigns.short_description = "Reject selected campaigns"
+
+admin.site.register(Campaign, CampaignAdmin)
 
 
 @admin.register(Donation)

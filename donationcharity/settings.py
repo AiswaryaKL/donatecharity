@@ -127,6 +127,10 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGOUT_REDIRECT_URL = '/login/'
 
+# settings.py
+USE_TZ = True
+TIME_ZONE = 'Asia/Kolkata'  # Set to your timezone
+
 
 RAZORPAY_KEY_ID = "rzp_test_d5VCv4MOwkIpcU"
 RAZORPAY_KEY_SECRET = "OXxDDHSLPDiM9yvqbd1SAFdN"

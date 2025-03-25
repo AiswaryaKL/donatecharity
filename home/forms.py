@@ -235,9 +235,9 @@ class CampaignForm(forms.ModelForm):
             raise forms.ValidationError("Title cannot be empty or contain only spaces.")
         if len(title) < 5 or len(title) > 100:
             raise forms.ValidationError("Title must be between 5 and 100 characters.")
-        if not re.match(r'^[A-Za-z\s]+$', title):
-           raise forms.ValidationError("Title can only contain letters and spaces.")
-    
+        if not re.match(r'^[A-Za-z\s.,!?;:\-\'"]+$', title):
+            raise forms.ValidationError("Title can only contain letters, spaces, and punctuation (.,!?;:'\"-).")
+
         return title
 
 

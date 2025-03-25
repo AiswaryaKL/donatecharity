@@ -209,14 +209,11 @@ def manageprofile(request):
 
     return render(request, 'manageprofile.html', {'form': form})
 
+@login_required
 def view_campaign(request):
-    query = request.GET.get('q', '')  # Get the search query from the URL
-    campaigns = Campaign.objects.all()  # Fetch all campaigns
+    campaigns = Campaign.objects.filter(verified=True).order_by('-created_at')  # Only show verified campaigns
+    return render(request, 'view_campaign.html', {'campaigns': campaigns})
 
-    if query:
-        campaigns = campaigns.filter(title__icontains=query)  # Filter campaigns by title
-
-    return render(request, 'view_campaign.html', {'campaigns': campaigns, 'query': query})
 
 
 
@@ -224,10 +221,22 @@ def makedonation(request, campaign_id):
     campaign = get_object_or_404(Campaign, id=campaign_id)
 
     if request.method == "POST":
-        amount = int(request.POST.get("amount")) * 100  # Convert to paise
+        amount = int(request.POST.get("amount"))
+
+        # Check if donation exceeds the goal amount
+        if amount > campaign.goal_amount:
+            messages.error(request, "Donation amount cannot exceed the campaign's goal amount.")
+            return render(request, 'makedonation.html', {
+                'campaign': campaign,
+                'razorpay_key': settings.RAZORPAY_KEY_ID
+            })
+
+        # Convert to paise (Razorpay uses smallest currency unit)
+        amount_in_paise = amount * 100
+
         client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
         payment = client.order.create({
-            "amount": amount,
+            "amount": amount_in_paise,
             "currency": "INR",
             "payment_capture": "1"
         })
@@ -236,12 +245,10 @@ def makedonation(request, campaign_id):
             'campaign': campaign,
             'razorpay_key': settings.RAZORPAY_KEY_ID,
             'order_id': payment['id'],
-            'amount': amount
+            'amount': amount_in_paise
         })
 
     return render(request, 'makedonation.html', {'campaign': campaign, 'razorpay_key': settings.RAZORPAY_KEY_ID})
-
-
 
 
 @login_required
@@ -331,21 +338,19 @@ def org_editprofile(request):
 def create_campaign(request):
     if request.method == "POST":
         form = CampaignForm(request.POST, request.FILES)
-
         if form.is_valid():
-            campaign = form.save(commit=False)  # Don't save to DB yet
+            campaign = form.save(commit=False)
 
-            # Ensure user has an organization before assigning
             if hasattr(request.user, "organization"):
-                campaign.organization = request.user.organization  # Assign organization
-                campaign.created_by = request.user  # Assign campaign creator
-                campaign.save()  # Now save it
+                campaign.organization = request.user.organization
+                campaign.created_by = request.user
+                campaign.save()
 
-                messages.success(request, "Campaign successfully created! 🚀")
-                return redirect("campaign_list")  # Redirect after saving
+                messages.success(request, "Your campaign has been submitted for admin approval.")
+                return redirect("campaign_list")
             else:
                 messages.error(request, "You are not associated with any organization.")
-                return redirect("create_campaign")  # Redirect back to form
+                return redirect("create_campaign")
 
     else:
         form = CampaignForm()
@@ -582,56 +587,67 @@ def organization_donations(request):
     return render(request, "organization_donations.html", context)
 
 
-from django.shortcuts import render
-from django.utils.timezone import now
-from django.db.models import Sum
-from .models import Organization, Campaign, Donation, CharityReport
+@login_required
+def verify_campaigns(request):
+    if not request.user.is_superuser:
+        messages.error(request, "Access Denied!")
+        return redirect('home')
 
+    campaigns = Campaign.objects.filter(verified=False)
+    return render(request, 'verify_campaigns.html', {'campaigns': campaigns})
+
+@login_required
+def approve_campaigns(request, campaign_id):
+    if not request.user.is_superuser:
+        messages.error(request, "Access Denied!")
+        return redirect('home')
+
+    campaign = get_object_or_404(Campaign, id=campaign_id)
+    campaign.verified = True
+    campaign.save()
+    messages.success(request, f"Campaign '{campaign.title}' has been verified.")
+    return redirect('verify_campaigns')
+
+
+from django.utils import timezone
+from django.db import models
+from .models import Donation
+from datetime import datetime
+def generate_report(request):
+    selected_month = request.GET.get('month')
+    
+    if not selected_month:
+        return render(request, 'charity_report.html', {'error': 'Please select a month to generate the report.'})
+    
+    try:
+        year, month = map(int, selected_month.split('-'))
+        start_date = timezone.make_aware(datetime(year, month, 1))
+        if month == 12:
+            end_date = timezone.make_aware(datetime(year + 1, 1, 1))
+        else:
+            end_date = timezone.make_aware(datetime(year, month + 1, 1))
+
+        # Fetch donations within the selected month
+        donations = Donation.objects.filter(date__gte=start_date, date__lt=end_date)
+        total_donations = donations.aggregate(total=models.Sum('amount'))['total'] or 0
+        total_donors = donations.values('user').distinct().count()
+
+        context = {
+            'selected_month': selected_month,
+            'donations': donations,
+            'total_donations': total_donations,
+            'total_donors': total_donors
+        }
+        return render(request, 'charity_report.html', context)
+    
+    except ValueError:
+        return render(request, 'charity_report.html', {'error': 'Invalid month format. Please try again.'})
+    
 def charity_report(request):
-    current_month = now().month  # Get current month
-    current_year = now().year  # Get current year
+    report_type = request.GET.get('type', None)
 
-    organizations = Organization.objects.all()
-    reports = []
-
-    for org in organizations:
-        total_donations = Donation.objects.filter(
-            campaign__organization=org,
-            date__year=current_year,
-            date__month=current_month
-        ).aggregate(total=Sum('amount'))['total'] or 0.00
-
-        num_donors = Donation.objects.filter(
-            campaign__organization=org,
-            date__year=current_year,
-            date__month=current_month
-        ).values('user').distinct().count()
-
-        num_campaigns = Campaign.objects.filter(
-            organization=org,
-            created_at__year=current_year,
-            created_at__month=current_month
-        ).count()
-
-        # ✅ Check if a report already exists to prevent duplicates
-        report, created = CharityReport.objects.get_or_create(
-            organization=org,
-            month=current_month,
-            year=current_year,
-            defaults={
-                'total_donations': total_donations,
-                'num_donors': num_donors,
-                'num_campaigns': num_campaigns
-            }
-        )
-
-        # If the report exists, update the values
-        if not created:
-            report.total_donations = total_donations
-            report.num_donors = num_donors
-            report.num_campaigns = num_campaigns
-            report.save()
-
-        reports.append(report)
-
-    return render(request, 'charity_report.html', {'reports': reports})
+    if report_type:
+        return generate_report(request)
+    else:
+        return render(request, 'charity_report.html')
+    

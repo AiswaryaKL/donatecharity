@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -22,13 +23,14 @@
             display: flex;
             justify-content: flex-start;
             align-items: center;
-            overflow-x: auto; /* Enables horizontal scrolling if necessary */
+            overflow-x: auto;
             padding: 0 20px;
             gap: 15px;
-            white-space: nowrap; /* Prevents wrapping */
+            white-space: nowrap;
         }
 
-        .link-container a, .btn-logout {
+        .link-container a,
+        .btn-logout {
             color: white;
             text-decoration: none;
             font-size: 14px;
@@ -57,7 +59,7 @@
             background: linear-gradient(135deg, #ff9a9e, #fad0c4, #ffdde1);
             font-family: 'Poppins', sans-serif;
             margin: 0;
-            padding-top: 70px; /* Space for fixed navbar */
+            padding-top: 70px;
         }
 
         .container {
@@ -98,7 +100,9 @@
             color: #333;
         }
 
-        input, select, textarea {
+        input,
+        select,
+        textarea {
             width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
@@ -137,8 +141,14 @@
             background-color: #f8d7da;
             color: #721c24;
         }
+
+        .alert-info {
+            background-color: #cce5ff;
+            color: #004085;
+        }
     </style>
 </head>
+
 <body>
     <!-- Navigation Bar -->
     <nav class="navbar">
@@ -165,11 +175,13 @@
             <h2>✨ Create a Campaign ✨</h2>
 
             {% if messages %}
-                <div class="alert alert-success">
-                    {% for message in messages %}
-                        {{ message }}
-                    {% endfor %}
-                </div>
+                {% for message in messages %}
+                    {% if 'pending verification' in message %}
+                        <div class="alert alert-info">{{ message }}</div>
+                    {% else %}
+                        <div class="alert alert-success">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
             {% endif %}
 
             {% if form.errors %}
@@ -193,4 +205,5 @@
         </div>
     </div>
 </body>
+
 </html>

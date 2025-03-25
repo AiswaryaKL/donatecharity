@@ -70,11 +70,13 @@ class Campaign(models.Model):
     image = models.ImageField(upload_to="campaign_images/", blank=True, null=True)
     created_by = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="campaigns", null=True, blank=True
-    )  # Temporarily allow null values
+    )  
     created_at = models.DateTimeField(auto_now_add=True)
+    verified = models.BooleanField(default=False)  # New field for admin verification
 
     def __str__(self):
         return self.title
+
     
 
 class Donation(models.Model):
