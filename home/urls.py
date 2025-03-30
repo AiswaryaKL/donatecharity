@@ -49,6 +49,7 @@ urlpatterns = [
     path('org_complaint_list/', views.org_complaint_list, name='org_complaint_list'),
     path('verify-campaigns/', views.verify_campaigns, name='verify_campaigns'),
     path('approve-campaigns/<int:campaign_id>/', views.approve_campaigns, name='approve_campaigns'),
-
+    path('approve_campaigns/<int:campaign_id>/', views.approve_campaigns, name='approve_campaigns'),
+    path('reject_campaigns/<int:campaign_id>/', views.reject_campaigns, name='reject_campaigns'),
 
 ]

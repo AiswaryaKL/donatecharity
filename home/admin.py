@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import DonorRegister
 from .models import OrganizationRegister
 from .models import Organization,Campaign
-from .models import Donation,Donor,Feedback,Complaint,CharityReport
+from .models import Donation,Donor,Feedback,Complaint
 
 # Register your models here.
 class DonorRegisterAdmin(admin.ModelAdmin):
@@ -29,30 +29,32 @@ class OrganizationAdmin(admin.ModelAdmin):
 
 
 class CampaignAdmin(admin.ModelAdmin):
-    list_display = ('title', 'organization', 'goal_amount', 'end_date', 'verified', 'created_at')
-    list_filter = ('verified', 'end_date', 'organization')
+    list_display = ('title', 'organization', 'goal_amount', 'raised_amount', 'end_date', 'created_by', 'verified', 'is_edit_pending', 'created_at')
+    list_filter = ('verified', 'is_edit_pending', 'end_date', 'created_at')
     search_fields = ('title', 'organization__name', 'created_by__username')
     actions = ['approve_campaigns', 'reject_campaigns']
 
     def approve_campaigns(self, request, queryset):
-        queryset.update(verified=True)
+        queryset.update(verified=True, is_edit_pending=False)
         self.message_user(request, "Selected campaigns have been approved.")
-    approve_campaigns.short_description = "Approve selected campaigns"
 
     def reject_campaigns(self, request, queryset):
-        queryset.update(verified=False)
+        queryset.update(is_edit_pending=False)
         self.message_user(request, "Selected campaigns have been rejected.")
+
+    approve_campaigns.short_description = "Approve selected campaigns"
     reject_campaigns.short_description = "Reject selected campaigns"
 
 admin.site.register(Campaign, CampaignAdmin)
 
 
-@admin.register(Donation)
+# Donation Admin
 class DonationAdmin(admin.ModelAdmin):
     list_display = ('user', 'campaign', 'amount', 'payment_id', 'date')
-    search_fields = ('user__username', 'campaign__title', 'payment_id')
     list_filter = ('date', 'campaign')
-    ordering = ('-date',)
+    search_fields = ('user__username', 'campaign__title', 'payment_id')
+    readonly_fields = ('date',)
+
 
 class DonorAdmin(admin.ModelAdmin):
     list_display = ('user', 'name', 'email', 'phone', 'total_donations')
@@ -78,12 +80,7 @@ class ComplaintAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'subject', 'message')
     list_filter = ('status', 'user_type')
 
-@admin.register(CharityReport)
-class CharityReportAdmin(admin.ModelAdmin):
-    list_display = ('organization', 'total_donations', 'num_donors', 'num_campaigns', 'month', 'year', 'created_at')
-    list_filter = ('month', 'year', 'organization')
-    search_fields = ('organization__name', 'year', 'month')
-    ordering = ('-year', '-month')
+
 
 
 

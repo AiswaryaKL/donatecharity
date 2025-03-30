@@ -26,7 +26,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .forms import OrganizationForm
 from .models import Organization
-from .models import Campaign,Donation,Donor,CharityReport
+from .models import Campaign,Donation,Donor
 from .forms import CampaignForm 
 
 
@@ -369,13 +369,15 @@ def edit_campaign(request, campaign_id):
     if request.method == "POST":
         form = CampaignForm(request.POST, request.FILES, instance=campaign)
         if form.is_valid():
+            campaign.is_edit_pending = True
+            campaign.verified = False  # Require re-verification
             form.save()
+            messages.info(request, "Your campaign edits are submitted for verification.")
             return redirect("campaign_list")
     else:
         form = CampaignForm(instance=campaign)
 
     return render(request, "edit_campaign.html", {"form": form, "campaign": campaign})
-
 
 
 
@@ -586,14 +588,13 @@ def organization_donations(request):
     }
     return render(request, "organization_donations.html", context)
 
-
 @login_required
 def verify_campaigns(request):
     if not request.user.is_superuser:
         messages.error(request, "Access Denied!")
         return redirect('home')
 
-    campaigns = Campaign.objects.filter(verified=False)
+    campaigns = Campaign.objects.filter(models.Q(verified=False) | models.Q(is_edit_pending=True))
     return render(request, 'verify_campaigns.html', {'campaigns': campaigns})
 
 @login_required
@@ -604,21 +605,40 @@ def approve_campaigns(request, campaign_id):
 
     campaign = get_object_or_404(Campaign, id=campaign_id)
     campaign.verified = True
+    campaign.is_edit_pending = False
     campaign.save()
-    messages.success(request, f"Campaign '{campaign.title}' has been verified.")
+    messages.success(request, f"Campaign '{campaign.title}' has been approved.")
     return redirect('verify_campaigns')
 
+@login_required
+def reject_campaigns(request, campaign_id):
+    if not request.user.is_superuser:
+        messages.error(request, "Access Denied!")
+        return redirect('home')
+
+    campaign = get_object_or_404(Campaign, id=campaign_id)
+    if campaign.is_edit_pending:
+        campaign.is_edit_pending = False
+        campaign.verified = True  # Revert to previous verified version
+        campaign.save()
+        messages.success(request, f"Campaign edits for '{campaign.title}' have been rejected.")
+    else:
+        campaign.delete()
+        messages.success(request, f"Campaign '{campaign.title}' has been rejected.")
+    return redirect('verify_campaigns')
 
 from django.utils import timezone
 from django.db import models
 from .models import Donation
 from datetime import datetime
+
+
 def generate_report(request):
     selected_month = request.GET.get('month')
-    
+
     if not selected_month:
         return render(request, 'charity_report.html', {'error': 'Please select a month to generate the report.'})
-    
+
     try:
         year, month = map(int, selected_month.split('-'))
         start_date = timezone.make_aware(datetime(year, month, 1))
@@ -627,27 +647,44 @@ def generate_report(request):
         else:
             end_date = timezone.make_aware(datetime(year, month + 1, 1))
 
-        # Fetch donations within the selected month
-        donations = Donation.objects.filter(date__gte=start_date, date__lt=end_date)
-        total_donations = donations.aggregate(total=models.Sum('amount'))['total'] or 0
+        # ✅ Fetch Donations and Campaigns
+        donations = Donation.objects.filter(date__gte=start_date, date__lt=end_date).select_related('campaign', 'user')
+        campaigns = Campaign.objects.filter(created_at__gte=start_date, created_at__lt=end_date)
+
+        # ✅ Calculate Total Donations and Total Donors
+        total_donations = donations.aggregate(total=Sum('amount'))['total'] or 0
         total_donors = donations.values('user').distinct().count()
+
+        # ✅ Calculate Raised Amount for Each Campaign
+        campaign_data = []
+        for campaign in campaigns:
+            raised_amount = Donation.objects.filter(campaign=campaign).aggregate(total_raised=Sum('amount'))['total_raised'] or 0
+            campaign_data.append({
+                'title': campaign.title,
+                'goal_amount': campaign.goal_amount,
+                'raised_amount': raised_amount,
+                'organization': campaign.organization.name,
+            })
+
+        # ✅ Group Campaigns by Organization
+        org_campaign_data = {}
+        for data in campaign_data:
+            org_name = data['organization']
+            if org_name not in org_campaign_data:
+                org_campaign_data[org_name] = []
+            org_campaign_data[org_name].append(data)
 
         context = {
             'selected_month': selected_month,
             'donations': donations,
+            'org_campaign_data': [{'organization': org, 'campaigns': campaigns} for org, campaigns in org_campaign_data.items()],
             'total_donations': total_donations,
-            'total_donors': total_donors
+            'total_donors': total_donors,
         }
         return render(request, 'charity_report.html', context)
-    
+
     except ValueError:
         return render(request, 'charity_report.html', {'error': 'Invalid month format. Please try again.'})
     
 def charity_report(request):
-    report_type = request.GET.get('type', None)
-
-    if report_type:
-        return generate_report(request)
-    else:
-        return render(request, 'charity_report.html')
-    
+    return render(request, 'charity_report.html')

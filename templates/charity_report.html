@@ -1,175 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📊 Charity Report</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ selected_month|default:"Charity Report" }}</title>
     <style>
-        body { 
-            font-family: 'Arial', sans-serif; 
-            background: linear-gradient(to right, #74ebd5, #acb6e5);
-            color: #333; 
-            text-align: center;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
             padding: 20px;
-            position: relative;
+            background-color: #f4f4f9;
         }
-
-        .back-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            padding: 10px 16px;
-            font-size: 16px;
-            font-weight: bold;
-            background-color: #ff5733;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .back-button:hover {
-            background-color: #c70039;
-            transform: scale(1.05);
-        }
-
-        h2 {
-            color: #fff;
-            font-size: 28px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        form {
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
-            display: inline-block;
-        }
-
-        label {
-            font-weight: bold;
-        }
-
-        input[type="month"] {
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-
-        button {
-            padding: 12px 18px;
-            font-size: 16px;
-            background-color: #007bff;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        #printSection {
-            background: #ffffff;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.2);
-            width: 90%;
-            max-width: 850px;
+        .container {
+            max-width: 900px;
             margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
-
-        h3 {
-            color: #28a745;
+        h1, h2 {
+            color: #333;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 20px;
         }
-
-        th, td {
+        table, th, td {
             border: 1px solid #ddd;
+        }
+        th, td {
             padding: 12px;
             text-align: left;
         }
-
         th {
-            background-color: #007bff;
+            background-color: #4CAF50;
             color: white;
         }
-
-        .print-button {
-            background-color: #28a745;
-            color: white;
+        .summary {
             margin-top: 20px;
+            padding: 10px;
+            background: #e8f5e9;
+            border-radius: 5px;
+        }
+        .print-button {
+            background-color: #007bff;
+            color: white;
             padding: 14px 22px;
             border-radius: 6px;
             cursor: pointer;
+            margin-top: 20px;
         }
-
+        .print-button:hover {
+            background-color: #0056b3;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input[type="month"], button[type="submit"] {
+            padding: 10px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
         @media print {
-            .print-button { display: none; }
+            .print-button, form {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>📊 Charity Report</h1>
 
-    <button class="back-button" onclick="window.location.href='{% url 'admindashboard' %}'">⬅️ Back to Admin Dashboard</button>
+        <!-- ✅ Month Selection Form (Always Visible) -->
+        <form method="GET" action="{% url 'generate_report' %}">
+            <label for="month">Select Month:</label>
+            <input type="month" id="month" name="month" value="{{ selected_month }}" required>
+            <button type="submit">Generate Report</button>
+        </form>
 
-    <h2>📊 Charity Report</h2>
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% elif selected_month %}
+            <h2>Report for {{ selected_month }}</h2>
 
-    <form method="GET" action="{% url 'generate_report' %}">
-        <label for="month">Select Month:</label>
-        <input type="month" id="month" name="month" required>
-        <button type="submit">Generate Report</button>
-    </form>
+            <div class="summary">
+                <p><strong>Total Donations:</strong> ₹{{ total_donations }}</p>
+                <p><strong>Total Donors:</strong> {{ total_donors }}</p>
+            </div>
 
-    {% if error %}
-        <p class="error">{{ error }}</p>
-    {% else %}
-        <div id="printSection">
-            <h3>📅 Charity Report for {{ selected_month }}</h3>
-            <p><strong>Total Donations:</strong> Rs. {{ total_donations }}</p>
-            <p><strong>Total Donors:</strong> {{ total_donors }}</p>
+            {% if org_campaign_data %}
+                <h2>Organizations & Campaigns</h2>
+                {% for org_data in org_campaign_data %}
+                    <h3>{{ org_data.organization }}</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Goal Amount</th>
+                                <th>Raised Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for campaign in org_data.campaigns %}
+                            <tr>
+                                <td>{{ campaign.title }}</td>
+                                <td>₹{{ campaign.goal_amount }}</td>
+                                <td>₹{{ campaign.raised_amount }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endfor %}
+            {% else %}
+                <p>No campaigns found for the selected month.</p>
+            {% endif %}
 
             {% if donations %}
+                <h2>Donation Details</h2>
                 <table>
                     <thead>
                         <tr>
                             <th>Donor Name</th>
-                            <th>Amount (Rs.)</th>
                             <th>Campaign</th>
+                            <th>Amount</th>
                             <th>Date</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for donation in donations %}
                         <tr>
-                            <td>{{ donation.donor.name }}</td>
-                            <td>Rs. {{ donation.amount }}</td>
+                            <td>{{ donation.user.username }}</td>
                             <td>{{ donation.campaign.title }}</td>
-                            <td>{{ donation.date }}</td>
+                            <td>₹{{ donation.amount }}</td>
+                            <td>{{ donation.date|date:"Y-m-d H:i" }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             {% else %}
-                <p>No donations found for the selected month.</p>
+                <p>No donation data available for the selected month.</p>
             {% endif %}
-        </div>
 
-        <button id="printReport" class="print-button" type="button">🖨️ Print Report</button>
+            <!-- ✅ Print Button -->
+            <button class="print-button" onclick="printReport()">🖨️ Print Report</button>
+        {% endif %}
+    </div>
 
-        <script>
-            document.getElementById("printReport").addEventListener("click", function () {
-                window.print();
-            });
-        </script>
-    {% endif %}
+    <script>
+    function printReport() {
+        const printSection = document.querySelector('.container').innerHTML;
+        const originalContent = document.body.innerHTML;
 
+        document.body.innerHTML = printSection;
+        window.print();
+        document.body.innerHTML = originalContent;
+        window.location.reload();
+    }
+    </script>
 </body>
 </html>

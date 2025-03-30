@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 
 # Donor Model
 class DonorRegister(models.Model):
@@ -66,6 +69,7 @@ class Campaign(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     goal_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    raised_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # New field
     end_date = models.DateField()
     image = models.ImageField(upload_to="campaign_images/", blank=True, null=True)
     created_by = models.ForeignKey(
@@ -73,12 +77,12 @@ class Campaign(models.Model):
     )  
     created_at = models.DateTimeField(auto_now_add=True)
     verified = models.BooleanField(default=False)  # New field for admin verification
+    is_edit_pending = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
 
-    
-
+# Donation Model
 class Donation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     campaign = models.ForeignKey('Campaign', on_delete=models.CASCADE)
@@ -88,6 +92,13 @@ class Donation(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.amount} - {self.date}"
+
+# Signal to Update Raised Amount
+@receiver(post_save, sender=Donation)
+def update_raised_amount(sender, instance, **kwargs):
+    campaign = instance.campaign
+    campaign.raised_amount = campaign.donation_set.aggregate(total=models.Sum('amount'))['total'] or 0
+    campaign.save()
     
 class Feedback(models.Model):
     USER_TYPES = [
@@ -124,18 +135,3 @@ class Complaint(models.Model):
     
     def __str__(self):
         return f"{self.user.username} - {self.subject}"
-    
-class CharityReport(models.Model):
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="charity_reports")
-    total_donations = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
-    num_donors = models.IntegerField(default=0)
-    num_campaigns = models.IntegerField(default=0)
-    month = models.IntegerField()  # Stores the month number (1-12)
-    year = models.IntegerField()  # Stores the year
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('organization', 'month', 'year')  # Ensure only one report per month per organization
-
-    def __str__(self):
-        return f"Report for {self.organization.name} - {self.month}/{self.year}"

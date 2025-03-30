@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ report_title }}</title>
+    <title>{{ selected_month }} Charity Report</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,14 +12,14 @@
             background-color: #f4f4f9;
         }
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             background-color: #fff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
-        h1 {
+        h1, h2 {
             color: #333;
         }
         table {
@@ -38,13 +38,52 @@
             background-color: #4CAF50;
             color: white;
         }
+        .summary {
+            margin-top: 20px;
+            padding: 10px;
+            background: #e8f5e9;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>{{ report_title }}</h1>
-        
-        {% if report_data %}
+        <h1>{{ selected_month }} Charity Report</h1>
+
+        <div class="summary">
+            <p><strong>Total Donations:</strong> ${{ total_donations }}</p>
+            <p><strong>Total Donors:</strong> {{ total_donors }}</p>
+        </div>
+
+        {% if org_campaign_data %}
+            <h2>Organizations & Campaigns</h2>
+            {% for org_data in org_campaign_data %}
+                <h3>{{ org_data.organization }}</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Goal Amount</th>
+                            <th>Raised Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for campaign in org_data.campaigns %}
+                        <tr>
+                            <td>{{ campaign.title }}</td>
+                            <td>${{ campaign.goal_amount }}</td>
+                            <td>${{ campaign.raised_amount }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endfor %}
+        {% else %}
+            <p>No campaign data available for this period.</p>
+        {% endif %}
+
+        {% if donations %}
+            <h2>Donation Details</h2>
             <table>
                 <thead>
                     <tr>
@@ -55,18 +94,18 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for donation in report_data %}
+                    {% for donation in donations %}
                     <tr>
                         <td>{{ donation.user.username }}</td>
                         <td>{{ donation.campaign.title }}</td>
                         <td>${{ donation.amount }}</td>
-                        <td>{{ donation.date }}</td>
+                        <td>{{ donation.date|date:"Y-m-d H:i" }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         {% else %}
-            <p>No data available for this period.</p>
+            <p>No donation data available for this period.</p>
         {% endif %}
     </div>
 </body>
