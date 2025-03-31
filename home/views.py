@@ -3,7 +3,13 @@ from django.shortcuts import render,get_object_or_404
 from django.shortcuts import redirect
 from django.contrib import messages
 import razorpay
+from django.db.models import F,Q
 from .forms import DonorProfileForm
+from django.utils import timezone
+from django.db import models
+from .models import Donation
+from datetime import datetime
+
 from .models import Feedback
 from .forms import DonorFeedbackForm, OrganizationFeedbackForm
 from django.utils.timezone import now
@@ -70,13 +76,19 @@ def donorlogin(request):
         user = authenticate(request, username=username, password=password)
         
         if user is not None:
-            login(request, user)
-            return redirect('donor')
+            # Ensure user is a donor (by checking the Donor model)
+            if hasattr(user, 'donor'):
+                login(request, user)
+                return redirect('donor')
+            else:
+                messages.error(request, 'You are not registered as a donor.')
+                return redirect('donorlogin')
         else:
             messages.error(request, 'Invalid username or password')
             return redirect('donorlogin')
     
     return render(request, "donorlogin.html")
+
 def donorregister(request):
     if request.method == "POST":
         form = DonorRegistrationForm(request.POST)
@@ -118,17 +130,21 @@ def organizationlogin(request):
         username = request.POST.get("uname")
         password = request.POST.get("password")
 
-        user = authenticate(request, username=username, password=password)  # Authenticate the user
+        user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            login(request, user)  # Log the user in
-            return redirect('organization')  # Redirect to organization profile page
+            # Ensure user is an organization (by checking the Organization model)
+            if hasattr(user, 'organization'):
+                login(request, user)
+                return redirect('organization')
+            else:
+                messages.error(request, 'You are not registered as an organization.')
+                return redirect('organizationlogin')
         else:
             messages.error(request, 'Invalid username or password')
             return redirect('organizationlogin')
 
     return render(request, "organizationlogin.html")
-
 
 
 def organizationregister(request):
@@ -208,11 +224,18 @@ def manageprofile(request):
         form = DonorProfileForm(instance=donor)
 
     return render(request, 'manageprofile.html', {'form': form})
-
 @login_required
 def view_campaign(request):
-    campaigns = Campaign.objects.filter(verified=True).order_by('-created_at')  # Only show verified campaigns
+    # Update campaign status if raised amount meets/exceeds goal or end date has passed
+    Campaign.objects.filter(
+        (Q(raised_amount__gte=F('goal_amount')) | Q(end_date__lt=timezone.now())) & Q(status="Ongoing")
+    ).update(status="Completed")
+    
+    # Fetch only verified campaigns
+    campaigns = Campaign.objects.filter(verified=True).order_by('-created_at')
+    
     return render(request, 'view_campaign.html', {'campaigns': campaigns})
+
 
 
 
@@ -220,36 +243,54 @@ def view_campaign(request):
 def makedonation(request, campaign_id):
     campaign = get_object_or_404(Campaign, id=campaign_id)
 
-    if request.method == "POST":
-        amount = int(request.POST.get("amount"))
+    # Calculate the remaining goal amount (goal - raised)
+    raised_amount = Donation.objects.filter(campaign=campaign).aggregate(total_amount=models.Sum('amount'))['total_amount'] or 0
+    remaining_goal = campaign.goal_amount - raised_amount
 
-        # Check if donation exceeds the goal amount
-        if amount > campaign.goal_amount:
-            messages.error(request, "Donation amount cannot exceed the campaign's goal amount.")
-            return render(request, 'makedonation.html', {
-                'campaign': campaign,
-                'razorpay_key': settings.RAZORPAY_KEY_ID
+    if request.method == "POST":
+        try:
+            amount = int(request.POST.get("amount"))
+
+            # Check if donation exceeds the remaining goal amount
+            if amount > remaining_goal:
+                messages.error(request, f"Donation amount cannot exceed the remaining goal amount of ₹{remaining_goal}.")
+                return render(request, 'makedonation.html', {
+                    'campaign': campaign,
+                    'razorpay_key': settings.RAZORPAY_KEY_ID,
+                    'remaining_goal': remaining_goal
+                })
+
+            # Convert to paise (Razorpay uses the smallest currency unit)
+            amount_in_paise = amount * 100
+
+            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+            payment = client.order.create({
+                "amount": amount_in_paise,
+                "currency": "INR",
+                "payment_capture": "1"
             })
 
-        # Convert to paise (Razorpay uses smallest currency unit)
-        amount_in_paise = amount * 100
+            return render(request, 'makedonation.html', {
+                'campaign': campaign,
+                'razorpay_key': settings.RAZORPAY_KEY_ID,
+                'order_id': payment['id'],
+                'amount': amount_in_paise,
+                'remaining_goal': remaining_goal
+            })
 
-        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-        payment = client.order.create({
-            "amount": amount_in_paise,
-            "currency": "INR",
-            "payment_capture": "1"
-        })
+        except ValueError:
+            messages.error(request, "Please enter a valid amount.")
+            return render(request, 'makedonation.html', {
+                'campaign': campaign,
+                'razorpay_key': settings.RAZORPAY_KEY_ID,
+                'remaining_goal': remaining_goal
+            })
 
-        return render(request, 'makedonation.html', {
-            'campaign': campaign,
-            'razorpay_key': settings.RAZORPAY_KEY_ID,
-            'order_id': payment['id'],
-            'amount': amount_in_paise
-        })
-
-    return render(request, 'makedonation.html', {'campaign': campaign, 'razorpay_key': settings.RAZORPAY_KEY_ID})
-
+    return render(request, 'makedonation.html', {
+        'campaign': campaign,
+        'razorpay_key': settings.RAZORPAY_KEY_ID,
+        'remaining_goal': remaining_goal
+    })
 
 @login_required
 def payment_success(request):
@@ -359,9 +400,14 @@ def create_campaign(request):
 
 @login_required
 def campaign_list(request):
-    campaigns = Campaign.objects.filter(created_by=request.user)  # Only show user's campaigns
-    return render(request, "campaign_list.html", {"campaigns": campaigns})
+    campaigns = Campaign.objects.filter(created_by=request.user)
 
+    # Calculate raised amount for each campaign
+    for campaign in campaigns:
+        campaign.raised_amount = campaign.donation_set.aggregate(Sum('amount'))['amount__sum'] or 0
+        campaign.progress_percentage = (campaign.raised_amount / campaign.goal_amount) * 100 if campaign.goal_amount > 0 else 0
+    
+    return render(request, "campaign_list.html", {"campaigns": campaigns})
 @login_required
 def edit_campaign(request, campaign_id):
     campaign = get_object_or_404(Campaign, id=campaign_id, created_by=request.user)
@@ -627,10 +673,6 @@ def reject_campaigns(request, campaign_id):
         messages.success(request, f"Campaign '{campaign.title}' has been rejected.")
     return redirect('verify_campaigns')
 
-from django.utils import timezone
-from django.db import models
-from .models import Donation
-from datetime import datetime
 
 
 def generate_report(request):
@@ -655,7 +697,7 @@ def generate_report(request):
         total_donations = donations.aggregate(total=Sum('amount'))['total'] or 0
         total_donors = donations.values('user').distinct().count()
 
-        # ✅ Calculate Raised Amount for Each Campaign
+        # ✅ Calculate Raised Amount for Each Campaign with Status
         campaign_data = []
         for campaign in campaigns:
             raised_amount = Donation.objects.filter(campaign=campaign).aggregate(total_raised=Sum('amount'))['total_raised'] or 0
@@ -664,6 +706,7 @@ def generate_report(request):
                 'goal_amount': campaign.goal_amount,
                 'raised_amount': raised_amount,
                 'organization': campaign.organization.name,
+                'status': campaign.status,  # ✅ Include Status
             })
 
         # ✅ Group Campaigns by Organization
@@ -681,10 +724,10 @@ def generate_report(request):
             'total_donations': total_donations,
             'total_donors': total_donors,
         }
-        return render(request, 'charity_report.html', context)
+        return render(request, 'generate_report.html', context)
 
     except ValueError:
         return render(request, 'charity_report.html', {'error': 'Invalid month format. Please try again.'})
-    
+
 def charity_report(request):
     return render(request, 'charity_report.html')

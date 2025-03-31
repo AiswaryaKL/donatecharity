@@ -1,58 +1,174 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ selected_month }} Charity Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <style>
+        @keyframes gradientBackground {
+            0% {
+                background: linear-gradient(135deg, #FFDEE9, #B5FFFC);
+            }
+            50% {
+                background: linear-gradient(135deg, #FFD3A5, #FD6585);
+            }
+            100% {
+                background: linear-gradient(135deg, #B5FFFC, #90F7EC);
+            }
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f4f4f9;
+            animation: gradientBackground 10s infinite alternate;
+            color: #333;
         }
+
         .container {
             max-width: 900px;
             margin: 0 auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1s ease;
         }
-        h1, h2 {
-            color: #333;
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
+        h1 {
+            font-size: 2.8rem;
+            color: #FD6585;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #007bff;
+        }
+
+        h3 {
+            color: #ff7f50;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            overflow: hidden;
+            animation: slideUp 0.7s ease;
         }
-        table, th, td {
-            border: 1px solid #ddd;
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
         th, td {
-            padding: 12px;
+            padding: 14px;
             text-align: left;
+            border-bottom: 2px solid #ddd;
+            transition: background-color 0.3s;
         }
+
         th {
-            background-color: #4CAF50;
+            background-color: #007bff;
             color: white;
         }
+
+        tr:hover td {
+            background-color: rgba(0, 123, 255, 0.1);
+            cursor: pointer;
+        }
+
         .summary {
             margin-top: 20px;
-            padding: 10px;
-            background: #e8f5e9;
-            border-radius: 5px;
+            padding: 20px;
+            background: linear-gradient(135deg, #90F7EC, #32CCBC);
+            color: white;
+            border-radius: 10px;
+            font-weight: 600;
+            animation: fadeIn 1.2s ease;
+        }
+
+        .status-completed {
+            color: #28a745;
+            font-weight: bold;
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-ongoing {
+            color: #ffc107;
+            font-weight: bold;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .print-button {
+            background-color: #007bff;
+            color: white;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            display: block;
+            margin: 30px auto;
+            animation: fadeIn 1.5s ease;
+            transition: background-color 0.3s;
+        }
+
+        .print-button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        @media print {
+            .print-button {
+                display: none;
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-        <h1>{{ selected_month }} Charity Report</h1>
+        <h1>📊 {{ selected_month }} Charity Report</h1>
 
         <div class="summary">
-            <p><strong>Total Donations:</strong> ${{ total_donations }}</p>
-            <p><strong>Total Donors:</strong> {{ total_donors }}</p>
+            <p><i class="fas fa-donate"></i> <strong>Total Donations:</strong> ₹{{ total_donations }}</p>
+            <p><i class="fas fa-users"></i> <strong>Total Donors:</strong> {{ total_donors }}</p>
         </div>
 
         {% if org_campaign_data %}
@@ -65,14 +181,20 @@
                             <th>Title</th>
                             <th>Goal Amount</th>
                             <th>Raised Amount</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for campaign in org_data.campaigns %}
                         <tr>
                             <td>{{ campaign.title }}</td>
-                            <td>${{ campaign.goal_amount }}</td>
-                            <td>${{ campaign.raised_amount }}</td>
+                            <td>₹{{ campaign.goal_amount }}</td>
+                            <td>₹{{ campaign.raised_amount }}</td>
+                            <td>
+                                <span class="{% if campaign.status == 'Completed' %}status-completed{% else %}status-ongoing{% endif %}">
+                                    {{ campaign.status }}
+                                </span>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -98,7 +220,7 @@
                     <tr>
                         <td>{{ donation.user.username }}</td>
                         <td>{{ donation.campaign.title }}</td>
-                        <td>${{ donation.amount }}</td>
+                        <td>₹{{ donation.amount }}</td>
                         <td>{{ donation.date|date:"Y-m-d H:i" }}</td>
                     </tr>
                     {% endfor %}
@@ -107,6 +229,16 @@
         {% else %}
             <p>No donation data available for this period.</p>
         {% endif %}
+
+        <!-- Print Button -->
+        <button class="print-button" onclick="printReport()">🖨️ Print Report</button>
     </div>
+
+    <script>
+    function printReport() {
+        window.print();
+    }
+    </script>
 </body>
+
 </html>

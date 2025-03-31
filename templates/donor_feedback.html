@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <style>
-        /* Navigation Bar Styling (No Changes) */
+        /* Navbar and Theme Styling */
         .navbar {
             background-color: rgba(44, 62, 80, 0.9);
             padding: 15px 0;
@@ -18,7 +18,6 @@
             width: 100%;
             z-index: 1000;
         }
-
         .link-container a {
             color: white;
             text-decoration: none;
@@ -27,12 +26,9 @@
             border-radius: 5px;
             transition: background-color 0.3s ease;
         }
-
         .link-container a:hover {
             background-color: #16a085;
         }
-
-        /* Logout Button Styling */
         .btn-logout {
             background-color: #e74c3c;
             color: white;
@@ -42,12 +38,9 @@
             font-size: 16px;
             transition: background-color 0.3s ease;
         }
-
         .btn-logout:hover {
             background-color: #c0392b;
         }
-
-        /* Pink Theme Background */
         body {
             background: linear-gradient(135deg, #f8bbd0, #f48fb1);
             height: 100vh;
@@ -55,9 +48,8 @@
             justify-content: center;
             align-items: center;
             font-family: 'Poppins', sans-serif;
-            margin-top: 80px; /* Adjust for fixed navbar */
+            margin-top: 80px;
         }
-
         .container {
             background: rgba(255, 240, 245, 0.95);
             padding: 30px;
@@ -65,23 +57,15 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             animation: fadeIn 1s ease-in-out;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
         h2 {
             color: #d81b60;
             text-align: center;
             margin-bottom: 20px;
         }
-
         label {
             color: #880e4f;
             font-weight: bold;
         }
-
         .btn-submit {
             background-color: #ff69b4;
             color: white;
@@ -91,17 +75,25 @@
             border-radius: 8px;
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
-
         .btn-submit:hover {
             background-color: #ff1493;
             transform: scale(1.05);
         }
-
-        p {
-            text-align: center;
-            font-size: 14px;
-        }
     </style>
+
+    <!-- JavaScript Validation -->
+    <script>
+        function validateForm() {
+            const messageField = document.getElementById('id_message').value;
+            const regex = /^[A-Za-z\s.,!?]*$/; // Only letters, spaces, and punctuation allowed
+
+            if (!regex.test(messageField)) {
+                alert("❗ Please enter only letters in the feedback message. Numbers are not allowed.");
+                return false;
+            }
+            return true;
+        }
+    </script>
 </head>
 <body>
     <!-- Navigation Bar -->
@@ -122,6 +114,7 @@
         </div>
     </nav>
 
+    <!-- Feedback Form Section -->
     <div class="container">
         <h2>🌟 Donor Feedback</h2>
         <form method="post" onsubmit="return validateForm()">

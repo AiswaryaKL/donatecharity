@@ -321,11 +321,26 @@ class DonorFeedbackForm(forms.ModelForm):
         model = Feedback
         fields = ['message', 'rating']
 
+    def clean_message(self):
+        message = self.cleaned_data.get('message')
+        if not message:
+            raise forms.ValidationError("Message is required.")
+        if not re.match(r'^[A-Za-z\s]+$', message.strip()):
+            raise forms.ValidationError("Message should contain only letters and spaces.")
+        return message
+
 class OrganizationFeedbackForm(forms.ModelForm):
     class Meta:
         model = Feedback
         fields = ['message', 'rating']
 
+    def clean_message(self):
+        message = self.cleaned_data.get('message')
+        if not message:
+            raise forms.ValidationError("Message is required.")
+        if not re.match(r'^[A-Za-z\s]+$', message.strip()):
+            raise forms.ValidationError("Message should contain only letters and spaces.")
+        return message
 
 class ComplaintForm(forms.ModelForm):
     class Meta:

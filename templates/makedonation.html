@@ -32,6 +32,9 @@
             border-radius: 20px;
             padding: 10px;
         }
+        .alert {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -39,6 +42,7 @@
         <h2>Make a Donation</h2>
         <p><strong>Campaign:</strong> {{ campaign.title }}</p>
         <p><strong>Goal Amount:</strong> ₹{{ campaign.goal_amount }}</p>
+        <p><strong>Remaining Goal:</strong> ₹{{ remaining_goal }}</p>
         
         {% if messages %}
         <div class="alert alert-danger">
@@ -52,7 +56,7 @@
             {% csrf_token %}
             <div class="mb-3">
                 <label for="donationAmount" class="form-label">Donation Amount (Rs.)</label>
-                <input type="number" class="form-control" id="donationAmount" name="amount" required>
+                <input type="number" class="form-control" id="donationAmount" name="amount" required min="1" max="{{ remaining_goal }}">
             </div>
             <button type="submit" class="btn btn-success w-100">Donate Now 💖</button>
         </form>

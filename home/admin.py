@@ -29,24 +29,26 @@ class OrganizationAdmin(admin.ModelAdmin):
 
 
 class CampaignAdmin(admin.ModelAdmin):
-    list_display = ('title', 'organization', 'goal_amount', 'raised_amount', 'end_date', 'created_by', 'verified', 'is_edit_pending', 'created_at')
-    list_filter = ('verified', 'is_edit_pending', 'end_date', 'created_at')
-    search_fields = ('title', 'organization__name', 'created_by__username')
-    actions = ['approve_campaigns', 'reject_campaigns']
+    list_display = ('title', 'organization', 'goal_amount', 'raised_amount', 'status', 'verified', 'is_edit_pending', 'end_date', 'created_at')
+    list_filter = ('status', 'verified', 'is_edit_pending', 'organization', 'end_date')
+    search_fields = ('title', 'organization__name')
+    actions = ['mark_as_completed', 'mark_as_verified']
 
-    def approve_campaigns(self, request, queryset):
-        queryset.update(verified=True, is_edit_pending=False)
-        self.message_user(request, "Selected campaigns have been approved.")
-
-    def reject_campaigns(self, request, queryset):
-        queryset.update(is_edit_pending=False)
-        self.message_user(request, "Selected campaigns have been rejected.")
-
-    approve_campaigns.short_description = "Approve selected campaigns"
-    reject_campaigns.short_description = "Reject selected campaigns"
-
+    @admin.action(description='Mark selected campaigns as Completed')
+    def mark_as_completed(self, request, queryset):
+        for campaign in queryset:
+            if campaign.raised_amount >= campaign.goal_amount:
+                campaign.status = 'Completed'
+                campaign.save()
+            else:
+                self.message_user(request, f"Cannot complete {campaign.title} as it hasn't reached the goal amount.")
+    
+    @admin.action(description='Mark selected campaigns as Verified')
+    def mark_as_verified(self, request, queryset):
+        queryset.update(verified=True)
+        self.message_user(request, "Selected campaigns marked as Verified.")
+    
 admin.site.register(Campaign, CampaignAdmin)
-
 
 # Donation Admin
 class DonationAdmin(admin.ModelAdmin):
@@ -54,7 +56,7 @@ class DonationAdmin(admin.ModelAdmin):
     list_filter = ('date', 'campaign')
     search_fields = ('user__username', 'campaign__title', 'payment_id')
     readonly_fields = ('date',)
-
+admin.site.register(Donation, DonationAdmin)
 
 class DonorAdmin(admin.ModelAdmin):
     list_display = ('user', 'name', 'email', 'phone', 'total_donations')

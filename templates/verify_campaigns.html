@@ -15,20 +15,23 @@
             margin: 0;
             padding: 0;
             color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
 
         .container {
             max-width: 90%;
-            margin: 50px auto;
             background-color: rgba(255, 255, 255, 0.9);
             padding: 30px;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             animation: fadeIn 1s ease;
+            text-align: center;
         }
 
         h2 {
-            text-align: center;
             color: #ff4e69;
             font-size: 36px;
             animation: slideIn 1s ease-in-out;
@@ -75,7 +78,7 @@
         }
 
         /* Button Styling */
-        .btn-success {
+        .btn-success, .btn-danger, .btn-home {
             background-color: #28a745;
             color: white;
             padding: 12px 20px;
@@ -84,6 +87,17 @@
             cursor: pointer;
             font-size: 14px;
             transition: background-color 0.3s ease, transform 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+        }
+
+        .btn-home {
+            background-color: #007bff;
         }
 
         .btn-success:hover {
@@ -91,19 +105,13 @@
             transform: scale(1.1);
         }
 
-        .btn-danger {
-            background-color: #dc3545;
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-        }
-
         .btn-danger:hover {
             background-color: #c82333;
+            transform: scale(1.1);
+        }
+
+        .btn-home:hover {
+            background-color: #0056b3;
             transform: scale(1.1);
         }
 
@@ -121,7 +129,6 @@
         p {
             color: #ff4e69;
             font-size: 18px;
-            text-align: center;
             margin-top: 30px;
         }
     </style>
@@ -167,6 +174,7 @@
         {% else %}
         <p>No pending campaigns for verification. 🎉</p>
         {% endif %}
+        <a href="{% url 'admindashboard' %}" class="btn-home">🏠 Back to Home</a>
     </div>
 </body>
 </html>

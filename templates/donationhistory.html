@@ -8,7 +8,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
-    /* Navigation Bar Styling */
+    /* Keep the Navbar Unchanged */
     .navbar {
       background-color: rgba(44, 62, 80, 0.9);
       padding: 15px 0;
@@ -38,7 +38,6 @@
       background-color: #16a085;
     }
 
-    /* Logout Button Styling */
     .btn-logout {
       background-color: #e74c3c;
       color: white;
@@ -47,37 +46,55 @@
       text-decoration: none;
       font-size: 16px;
       transition: background-color 0.3s ease;
+      border: none;
+      cursor: pointer;
     }
 
     .btn-logout:hover {
       background-color: #c0392b;
     }
 
+    /* Page Styling */
     body {
-      font-family: 'Arial', sans-serif;
-      background: linear-gradient(135deg, #2ecc71, #27ae60);
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4);
       margin: 0;
-      padding: 0;
+      padding-top: 90px;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      padding-top: 80px; /* Prevent overlap with navbar */
     }
 
     .container {
       width: 90%;
       max-width: 900px;
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      background: rgba(255, 255, 255, 0.9);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
       text-align: center;
+      backdrop-filter: blur(10px);
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     h1 {
-      color: #2ecc71;
-      margin-bottom: 20px;
+      background: linear-gradient(135deg, #ff758c, #ff7eb3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: bold;
+      font-size: 2.5rem;
     }
 
     table {
@@ -85,9 +102,9 @@
       border-collapse: collapse;
       margin-top: 20px;
       background: white;
-      border-radius: 8px;
+      border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
     }
 
     th, td {
@@ -97,32 +114,38 @@
     }
 
     th {
-      background-color: #2ecc71;
+      background: linear-gradient(135deg, #ff758c, #ff7eb3);
       color: white;
       font-size: 16px;
       text-transform: uppercase;
     }
 
     tr:hover {
-      background-color: #f1f1f1;
-      transition: 0.3s ease-in-out;
+      background-color: #ffe0e9;
+      transition: all 0.3s ease-in-out;
     }
 
     .amount {
       font-weight: bold;
-      color: #27ae60;
+      color: #e84393;
+      text-shadow: 0 0 10px rgba(255, 118, 151, 0.8);
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .amount:hover {
+      transform: scale(1.1);
     }
 
     .payment-id {
-      background: #ecf0f1;
-      padding: 5px 10px;
+      background: #fce4ec;
+      padding: 6px 10px;
       border-radius: 5px;
       font-size: 14px;
       color: #555;
     }
 
     .note {
-      font-size: 16px;
+      font-size: 18px;
       color: #777;
       margin-top: 20px;
     }
@@ -148,6 +171,7 @@
     </div>
   </nav>
 
+  <!-- Donation History Content -->
   <div class="container">
     <h1>Donation History</h1>
     {% if donations %}

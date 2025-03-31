@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -17,21 +18,34 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background: linear-gradient(to right, #4CAF50, #2E8B57);
+            background: linear-gradient(135deg, #FF9A8B, #FF6A88, #FF99AC);
+            animation: gradientAnimation 5s infinite alternate;
+        }
+
+        @keyframes gradientAnimation {
+            from { background: linear-gradient(135deg, #FF9A8B, #FF6A88, #FF99AC); }
+            to { background: linear-gradient(135deg, #8EC5FC, #E0C3FC); }
         }
 
         .login-container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             width: 350px;
             text-align: center;
+            animation: fadeIn 1s ease;
         }
 
-        .login-container h2 {
-            margin-bottom: 20px;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
             color: #333;
+            margin-bottom: 20px;
+            font-size: 2rem;
         }
 
         .message {
@@ -40,7 +54,7 @@
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             text-align: left;
         }
 
@@ -51,33 +65,39 @@
 
         input {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
             font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #FF6A88;
+            outline: none;
         }
 
         .btn {
             width: 100%;
-            padding: 10px;
-            background: #4CAF50;
+            padding: 12px;
+            background: linear-gradient(135deg, #FF6A88, #FF99AC);
             color: white;
             border: none;
-            border-radius: 5px;
-            font-size: 16px;
+            border-radius: 10px;
+            font-size: 18px;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: transform 0.3s, background 0.3s;
         }
 
         .btn:hover {
-            background: #45a049;
+            transform: scale(1.05);
+            background: linear-gradient(135deg, #FF9A8B, #FF6A88);
         }
 
     </style>
 </head>
 <body>
-
     <div class="login-container">
         <h2>Admin Login</h2>
 
@@ -100,6 +120,5 @@
             <button type="submit" class="btn">Login</button>
         </form>
     </div>
-
 </body>
 </html>

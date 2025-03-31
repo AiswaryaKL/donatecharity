@@ -69,19 +69,31 @@ class Campaign(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     goal_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    raised_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # New field
+    raised_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     end_date = models.DateField()
     image = models.ImageField(upload_to="campaign_images/", blank=True, null=True)
     created_by = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="campaigns", null=True, blank=True
     )  
     created_at = models.DateTimeField(auto_now_add=True)
-    verified = models.BooleanField(default=False)  # New field for admin verification
+    verified = models.BooleanField(default=False)
     is_edit_pending = models.BooleanField(default=False)
+    
+    STATUS_CHOICES = [
+        ("Ongoing", "Ongoing"),
+        ("Completed", "Completed"),
+    ]
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="Ongoing")
+
+    def save(self, *args, **kwargs):
+        """Automatically mark the campaign as completed if the goal is met."""
+        if self.raised_amount >= self.goal_amount:
+            self.status = "Completed"
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
-
+    
 # Donation Model
 class Donation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

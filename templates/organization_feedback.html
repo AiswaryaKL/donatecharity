@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <style>
-        /* Navigation Bar Styling */
+        /* Navigation Bar Styling (Unchanged) */
         .navbar {
             background-color: rgba(44, 62, 80, 0.95);
             padding: 15px 0;
@@ -53,7 +54,7 @@
         /* Body Styling */
         body {
             background: linear-gradient(135deg, #ff9a9e, #fad0c4);
-            margin-top: 80px; /* Adjust to prevent content overlap with fixed navbar */
+            margin-top: 80px;
             font-family: 'Poppins', sans-serif;
         }
 
@@ -95,16 +96,10 @@
             background-color: #e84393;
             transform: scale(1.05);
         }
-
-        p {
-            text-align: center;
-            font-size: 14px;
-            color: green;
-        }
     </style>
 </head>
 <body>
-    <!-- Navigation Bar -->
+    <!-- Navigation Bar (Unchanged) -->
     <nav class="navbar">
         <div class="link-container">
             <a href="{% url 'org_profile' %}"><i class="fas fa-user-cog"></i> Manage Profile</a>
@@ -123,25 +118,73 @@
         </div>
     </nav>
 
-    <!-- Feedback Form -->
+    <!-- Feedback Form Section -->
     <div class="container">
         <h2>🏢 Organization Feedback</h2>
-        <form method="post">
+
+        <!-- Error and Success Alerts -->
+        {% if form.errors %}
+        <div class="alert alert-danger" role="alert">
+            <strong>Oops! Something went wrong.</strong>
+            <ul>
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li><b>{{ field|capfirst }}</b>: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% for message in messages %}
+        <div class="alert alert-success" role="alert">
+            {{ message }}
+        </div>
+        {% endfor %}
+
+        <!-- Feedback Form -->
+        <form method="post" id="feedbackForm">
             {% csrf_token %}
             <div class="mb-3">
                 <label for="id_message">Your Feedback:</label>
                 {{ form.message }}
             </div>
             <div class="mb-3">
-                <label for="id_rating">Your Rating:</label>
+                <label for="id_rating">Your Rating (1-5):</label>
                 {{ form.rating }}
             </div>
             <button type="submit" class="btn btn-primary w-100">Submit Feedback</button>
         </form>
-
-        {% for message in messages %}
-        <p>{{ message }}</p>
-        {% endfor %}
     </div>
+
+    <!-- JavaScript for Client-side Validation -->
+    <script>
+        document.getElementById('feedbackForm').onsubmit = function(event) {
+            const messageField = document.getElementById('id_message').value.trim();
+            const ratingField = document.getElementById('id_rating').value;
+
+            const messageRegex = /^[A-Za-z\s]+$/;
+
+            // Validate Message
+            if (!messageField) {
+                alert('❗ Please enter your feedback.');
+                event.preventDefault();
+                return;
+            }
+
+            if (!messageRegex.test(messageField)) {
+                alert('❗ Feedback should only contain letters and spaces.');
+                event.preventDefault();
+                return;
+            }
+
+            // Validate Rating
+            if (!ratingField || isNaN(ratingField) || ratingField < 1 || ratingField > 5) {
+                alert('❗ Please provide a valid rating between 1 and 5.');
+                event.preventDefault();
+                return;
+            }
+        };
+    </script>
 </body>
 </html>
