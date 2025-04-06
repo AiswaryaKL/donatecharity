@@ -1,152 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Donor Profile</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-    <style>
-        /* Navigation Bar Styling */
-        .navbar {
-            background-color: rgba(44, 62, 80, 0.9);
-            padding: 15px 0;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 100%;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Donor Profile</title>
 
-        .link-container {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-        .link-container a {
-            color: white;
-            text-decoration: none;
-            font-size: 16px;
-            padding: 12px 20px;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
+  <!-- Correct Font Awesome 6 CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css" rel="stylesheet" />
 
-        .link-container a:hover {
-            background-color: #16a085;
-        }
+  <style>
+    body {
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+    }
 
-        /* Logout Button Styling */
-        .btn-logout {
-            background-color: #e74c3c;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
-        }
+    .navbar {
+      background-color: #1e2a38;
+      padding: 15px;
+    }
 
-        .btn-logout:hover {
-            background-color: #c0392b;
-        }
+    .link-container a,
+    .link-container button.nav-link {
+      color: white !important;
+      padding: 10px 15px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      display: inline-block;
+      border: none;
+      background: none;
+      cursor: pointer;
+    }
 
-        /* Full-Screen Background with Gradient */
-        body {
-            background: linear-gradient(135deg, #ff758c, #ff7eb3, #6a11cb);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0;
-            font-family: 'Poppins', sans-serif;
-        }
+    .link-container a:hover,
+    .link-container button.nav-link:hover {
+      background-color: #2c3e50;
+      border-radius: 5px;
+      transform: scale(1.05);
+    }
 
-        /* Glassmorphism Card Effect */
-        .profile-card {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(15px);
-            border-radius: 15px;
-            padding: 30px;
-            max-width: 600px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            color: white;
-            transition: transform 0.3s ease;
-        }
+    .profile-section {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 50px 15px;
+    }
 
-        .profile-card:hover {
-            transform: scale(1.02);
-        }
+    .profile-card {
+      background-color: white;
+      border-radius: 15px;
+      padding: 40px;
+      width: 100%;
+      max-width: 800px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      animation: fadeInUp 1s ease forwards;
+      opacity: 0;
+    }
 
-        /* Profile Info Styling */
-        .profile-info {
-            font-size: 1.2rem;
-            padding: 10px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            margin: 8px 0;
-        }
+    .profile-title {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 30px;
+      color: #333;
+      text-align: center;
+    }
 
-        .badge-custom {
-            background: rgba(0, 255, 127, 0.8);
-            font-size: 1.1rem;
-            padding: 6px 12px;
-            border-radius: 8px;
-        }
+    .profile-info {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #f1f1f1;
+      border-radius: 8px;
+      animation: slideIn 0.6s ease forwards;
+      opacity: 0;
+    }
 
-        .action-btn {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            margin: 10px;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
+    .profile-info:nth-child(2) {
+      animation-delay: 0.3s;
+    }
+    .profile-info:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    .profile-info:nth-child(4) {
+      animation-delay: 0.5s;
+    }
+    .profile-info:nth-child(5) {
+      animation-delay: 0.6s;
+    }
+    .profile-info:nth-child(6) {
+      animation-delay: 0.7s;
+    }
 
-        .action-btn:hover {
-            background-color: #45a049;
-        }
-    </style>
+    .badge-custom {
+      background-color: #0d6efd;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 5px;
+      font-weight: 500;
+    }
+
+    .action-btn {
+      margin: 15px 10px 0 10px;
+      transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+
+    .action-btn:hover {
+      transform: scale(1.05);
+    }
+
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideIn {
+      0% {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .profile-card {
+        padding: 20px;
+      }
+      .profile-title {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid">
-            <div class="link-container">
-                <a href="{% url 'donor_profile' %}"><i class="fas fa-user-cog"></i> Manage Profile</a>
-                <a href="{% url 'view_campaign' %}"><i class="fas fa-search"></i> View Campaigns</a>
-                <a href="{% url 'donor_feedback' %}"><i class="fas fa-comment-alt"></i> Add Feedback</a>
-                <a href="{% url 'submit_donor_complaint' %}"><i class="fas fa-exclamation-circle"></i> Send Complaint</a>
-                <a href="{% url 'donor_complaint_list' %}"><i class="fas fa-info-circle"></i> Complaint Status</a>
-                <a href="{% url 'donationhistory' %}"><i class="fas fa-history"></i> Donation History</a>
-                <form action="{% url 'donorlogout' %}" method="post" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn-logout">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
-                </form>
-            </div>
-        </div>
-    </nav>
 
-    <div class="profile-card">
-        <h2 class="profile-title">Donor Profile</h2>
-        <div class="profile-info"><strong>Name:</strong> {{ donor.name }}</div>
-        <div class="profile-info"><strong>Email:</strong> {{ donor.email }}</div>
-        <div class="profile-info"><strong>Phone:</strong> {{ donor.phone }}</div>
-        <div class="profile-info"><strong>Address:</strong> {{ donor.address }}</div>
-        <div class="profile-info"><strong>Date of Birth:</strong> {{ donor.date_of_birth|date:'Y-m-d' }}</div>
-        <div class="profile-info"><strong>Total Donations:</strong> <span class="badge-custom">{{ total_donations|default:"0" }}</span></div>
+<!-- Navigation Bar -->
+<nav class="navbar">
+  <div class="link-container">
+    <a href="{% url 'donor_profile' %}"><i class="fa-solid fa-user-gear"></i> Manage Profile</a>
+    <a href="{% url 'view_campaign' %}"><i class="fa-solid fa-magnifying-glass"></i> View Campaigns</a>
+    <a href="{% url 'donor_feedback' %}"><i class="fa-solid fa-comment-dots"></i> Add Feedback</a>
+    <a href="{% url 'submit_donor_complaint' %}"><i class="fa-solid fa-triangle-exclamation"></i> Send Complaint</a>
+    <a href="{% url 'donor_complaint_list' %}"><i class="fa-solid fa-circle-info"></i> Complaint Status</a>
+    <a href="{% url 'donationhistory' %}"><i class="fa-solid fa-clock-rotate-left"></i> Donation History</a>
+    <form action="{% url 'donorlogout' %}" method="post" style="display: inline;">
+      {% csrf_token %}
+      <button type="submit" class="nav-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+    </form>
+  </div>
+</nav>
 
-        <a href="{% url 'manageprofile' %}">
-            <button class="action-btn">Edit Profile</button>
-        </a>
-        <a href="{% url 'donor' %}">
-            <button class="action-btn">Back to Home</button>
-        </a>
+<!-- Profile Section -->
+<div class="profile-section">
+  <div class="profile-card">
+    <h2 class="profile-title">Welcome, {{ donor.name }}</h2>
+
+    <div class="profile-info"><strong>Email:</strong> {{ donor.email }}</div>
+    <div class="profile-info"><strong>Phone:</strong> {{ donor.phone }}</div>
+    <div class="profile-info"><strong>Address:</strong> {{ donor.address }}</div>
+    <div class="profile-info"><strong>Date of Birth:</strong> {{ donor.date_of_birth|date:'Y-m-d' }}</div>
+    <div class="profile-info">
+      <strong>Total Donations:</strong> <span class="badge-custom">{{ total_donations|default:"0" }}</span>
     </div>
+
+    <div class="text-center">
+      <a href="{% url 'manageprofile' %}" class="btn btn-primary action-btn">Edit Profile</a>
+      <a href="{% url 'donor' %}" class="btn btn-secondary action-btn">Back to Home</a>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

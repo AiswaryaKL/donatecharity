@@ -11,73 +11,69 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <style>
-    /* Background Styling */
     body {
-      background: linear-gradient(135deg, #ff9a9e, #fecfef);
+      background: linear-gradient(135deg, #ffe6f0, #fddde6, #ffeaf4);
       font-family: 'Poppins', sans-serif;
       margin-top: 80px;
     }
 
-    /* Navbar (Unchanged) */
+    /* Keep the navbar original (dark) */
     .navbar {
-      background-color: rgba(44, 62, 80, 0.9);
+      background-color: #2c3e50;
       padding: 15px 0;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       position: fixed;
       width: 100%;
       top: 0;
       z-index: 1000;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
     .link-container {
       display: flex;
       justify-content: center;
-      gap: 20px;
+      gap: 18px;
+      flex-wrap: wrap;
     }
 
     .link-container a,
     .btn-logout {
-      color: white;
-      text-decoration: none;
-      font-size: 16px;
-      padding: 12px 20px;
+      color: #f0f0f0;
+      font-size: 15px;
+      padding: 10px 16px;
       border-radius: 5px;
+      text-decoration: none;
       transition: background-color 0.3s ease;
-      background-color: transparent;
+    }
+
+    .link-container a:hover {
+      background-color: #3b4f66;
+    }
+
+    .btn-logout {
+      background-color: #444;
       border: none;
       cursor: pointer;
     }
 
-    .link-container a:hover,
     .btn-logout:hover {
-      background-color: #16a085;
+      background-color: #222;
     }
 
-    .btn-logout {
-      background-color: #e74c3c;
-    }
-
-    .btn-logout:hover {
-      background-color: #c0392b;
-    }
-
-    /* Form Container Styling */
+    /* Pink-themed form container */
     .container {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(20px);
-      border-radius: 20px;
-      padding: 40px;
+      background: #fff0f5;
+      border-radius: 15px;
+      padding: 35px 45px;
       max-width: 600px;
-      width: 90%;
-      margin-top: 30px;
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-      animation: fadeIn 1s ease-in-out;
+      margin: 30px auto;
+      box-shadow: 0 15px 35px rgba(255, 105, 180, 0.2);
+      animation: slideFadeIn 0.9s ease-in-out;
     }
 
-    @keyframes fadeIn {
+    @keyframes slideFadeIn {
       from {
         opacity: 0;
-        transform: translateY(-20px);
+        transform: translateY(25px);
       }
       to {
         opacity: 1;
@@ -85,52 +81,55 @@
       }
     }
 
-    /* Heading Styling */
     h2 {
-      background: linear-gradient(135deg, #ff758c, #ff7eb3);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      font-weight: bold;
-      font-size: 2.5rem;
+      font-size: 2.2rem;
+      font-weight: 600;
+      color: #d63384;
+      text-align: center;
+      margin-bottom: 30px;
     }
 
-    /* Form Field Styling */
     label {
-      font-weight: 600;
-      color: #333;
+      font-weight: 500;
+      color: #c0397d;
     }
 
     input,
     textarea {
-      border-radius: 12px;
-      border: 2px solid #ff7e5f;
+      border-radius: 10px;
+      border: 1px solid #f5b5d3;
       padding: 12px;
       font-size: 1rem;
       width: 100%;
-      transition: border 0.3s ease;
+      background-color: #fff;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
 
     input:focus,
     textarea:focus {
-      border-color: #ff7eb3;
-      box-shadow: 0 0 12px rgba(255, 126, 179, 0.5);
+      border-color: #ff69b4;
+      box-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
       outline: none;
     }
 
-    /* Submit Button */
-    .btn-danger {
-      background: linear-gradient(135deg, #ff758c, #ff7eb3);
+    .btn-submit {
+      background-color: #ff69b4;
+      color: #fff;
       border: none;
-      border-radius: 30px;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       padding: 12px;
-      transition: all 0.3s ease;
+      border-radius: 25px;
+      width: 100%;
+      transition: background-color 0.3s ease, transform 0.2s ease;
     }
 
-    .btn-danger:hover {
-      background: linear-gradient(135deg, #ff7eb3, #ff758c);
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(255, 120, 140, 0.3);
+    .btn-submit:hover {
+      background-color: #e75496;
+      transform: scale(1.02);
+    }
+
+    .text-danger {
+      font-size: 0.875rem;
     }
   </style>
 </head>
@@ -154,9 +153,9 @@
     </div>
   </nav>
 
-  <!-- Complaint Form Section -->
+  <!-- Complaint Form -->
   <div class="container">
-    <h2 class="text-center">📝 Submit Your Complaint</h2>
+    <h2>Submit Your Complaint</h2>
     <form method="post">
       {% csrf_token %}
 
@@ -179,11 +178,10 @@
       </div>
 
       <!-- Submit Button -->
-      <button type="submit" class="btn btn-danger w-100">🚀 Submit Complaint</button>
+      <button type="submit" class="btn-submit">Submit Complaint</button>
     </form>
   </div>
 
-  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 

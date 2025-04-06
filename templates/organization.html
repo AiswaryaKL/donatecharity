@@ -8,221 +8,188 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 
     <style>
-        /* General Body Styling */
-        body {
-            font-family: 'Arial', sans-serif;
-            background: url('{% static "images/organization.jpg" %}') no-repeat center center fixed;
-            background-size: cover;
+        html, body {
+            height: 100%;
             margin: 0;
             padding: 0;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body {
+            background: url('{% static "images/organization.jpg" %}') no-repeat center center fixed;
+            background-size: cover;
             color: #333;
         }
-        
-
 
         /* Navigation Bar Styling */
         .navbar {
-            background-color: rgba(44, 62, 80, 0.9);
-            padding: 15px 0;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: rgba(44, 62, 80, 0.95);
+            padding: 10px 30px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .brand a {
+            font-size: 22px;
+            font-weight: bold;
+            color: #f1c40f;
+            text-decoration: none;
+        }
+
+        .menu-toggle {
+            display: none;
+            font-size: 22px;
+            color: white;
+            cursor: pointer;
         }
 
         .link-container {
             display: flex;
-            justify-content: center;
-            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 15px;
         }
 
-        .link-container a {
+        .link-container a,
+        .btn-logout {
             color: white;
             text-decoration: none;
-            font-size: 16px;
-            padding: 12px 20px;
+            font-size: 15px;
+            padding: 10px 15px;
             border-radius: 5px;
+            background-color: transparent;
             transition: background-color 0.3s ease;
+            white-space: nowrap;
         }
 
         .link-container a:hover {
             background-color: #16a085;
         }
 
-        /* Logout Button Styling */
         .btn-logout {
             background-color: #e74c3c;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
+            border: none;
+            cursor: pointer;
         }
 
         .btn-logout:hover {
             background-color: #c0392b;
         }
 
+        /* Mobile Responsive Navbar */
+        @media screen and (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .link-container {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                margin-top: 15px;
+            }
+
+            .link-container.show {
+                display: flex;
+            }
+
+            .link-container a,
+            .btn-logout {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
         /* Hero Section Styling */
         .hero-section {
             text-align: center;
-            background: url('https://via.placeholder.com/1500x800?text=Background+Image') no-repeat center center/cover;
             color: white;
             padding: 100px 20px;
-            background-position: center;
-            background-size: cover;
+            background: rgba(0, 0, 0, 0.4);
+            background-blend-mode: darken;
         }
 
         .hero-section h1 {
             font-size: 50px;
             margin-bottom: 20px;
             font-weight: bold;
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
         }
 
         .hero-section p {
             font-size: 22px;
             margin-bottom: 30px;
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
         }
 
-        .btn-donate {
-            background-color: #27ae60;
-            color: white;
-            padding: 20px 40px;
-            font-size: 18px;
-            text-decoration: none;
-            border-radius: 50px;
-            transition: background-color 0.3s ease;
-        }
-
-        .btn-donate:hover {
-            background-color: #2ecc71;
-        }
-
-        /* Featured Charities Section Styling */
-        .featured-charities {
-            background: url('https://via.placeholder.com/1500x500?text=Featured+Charity+Background') no-repeat center center/cover;
-            background-color: #fff;
-            padding: 50px 20px;
-            text-align: center;
-            background-position: center;
-            background-size: cover;
-            color: white;
-        }
-
-        .featured-charities h2 {
-            font-size: 36px;
-            margin-bottom: 40px;
-            color: #f39c12;
-        }
-
-        .charity-list {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            flex-wrap: wrap;
-        }
-
-        .charity-item {
-            background-color: rgba(0, 0, 0, 0.7); /* Dark background for readability */
-            padding: 20px;
-            border-radius: 8px;
-            width: 250px;
-            text-align: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .charity-item:hover {
-            transform: translateY(-10px);
-        }
-
-        .charity-item h3 {
-            font-size: 24px;
-            color: #f39c12;
-        }
-
-        .charity-item p {
-            font-size: 16px;
-            color: #ecf0f1;
-            margin-bottom: 20px;
-        }
-
-        .btn-charity {
-            background-color: #2980b9;
-            color: white;
-            padding: 10px 20px;
-            font-size: 16px;
-            text-decoration: none;
-            border-radius: 30px;
-            transition: background-color 0.3s ease;
-        }
-
-        .btn-charity:hover {
-            background-color: #3498db;
-        }
-
-        /* Footer Styling */
+        /* Footer fixed at bottom when content is short */
         footer {
             text-align: center;
             padding: 20px;
             background-color: #2c3e50;
             color: white;
-            margin-top: 50px;
-        }
-
-        /* Media Queries for Mobile */
-        @media screen and (max-width: 768px) {
-            .link-container {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .charity-list {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .hero-section h1 {
-                font-size: 40px;
-            }
-
-            .hero-section p {
-                font-size: 18px;
-            }
+            margin-top: auto;
         }
     </style>
-
 </head>
 <body>
 
     <!-- Navigation Bar -->
     <nav class="navbar">
-        <div class="link-container">
-            
-            <a href="{% url 'org_profile' %}"><i class="fas fa-user-cog"></i> Manage Profile</a>
-            <a href="{% url 'create_campaign' %}"><i class="fas fa-bullhorn"></i> Create Campaign</a>
-            <a href="{% url 'organization_donations' %}"><i class="fas fa-hand-holding-usd"></i> View Donations</a>
-            <a href="{% url 'campaign_list' %}"><i class="fas fa-edit"></i> view created campaigns</a>
-            <a href="{% url 'submit_org_complaint' %}"><i class="fas fa-exclamation-circle"></i> Send Complaints</a>
-            <a href="{% url 'org_complaint_list' %}"><i class="fas fa-info-circle"></i> Complaint Status</a>
-            <a href="{% url 'organization_feedback' %}"><i class="fas fa-comment-alt"></i> Add Feedback</a>
-            <form action="{% url 'donorlogout' %}" method="post" style="display: inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn-logout">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-            </form>
+        <div class="nav-container">
+            <div class="brand">
+                <!-- Optional Logo or Brand Name -->
+            </div>
+            <div class="menu-toggle" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="link-container" id="nav-links">
+                <a href="{% url 'org_profile' %}"><i class="fas fa-user-cog"></i> Manage Profile</a>
+                <a href="{% url 'create_campaign' %}"><i class="fas fa-bullhorn"></i> Create Campaign</a>
+                <a href="{% url 'organization_donations' %}"><i class="fas fa-hand-holding-usd"></i> View Donations</a>
+                <a href="{% url 'campaign_list' %}"><i class="fas fa-edit"></i> View Campaigns</a>
+                <a href="{% url 'submit_org_complaint' %}"><i class="fas fa-exclamation-circle"></i> Complaints</a>
+                <a href="{% url 'org_complaint_list' %}"><i class="fas fa-info-circle"></i> Complaint Status</a>
+                <a href="{% url 'organization_feedback' %}"><i class="fas fa-comment-alt"></i> Feedback</a>
+                <form action="{% url 'donorlogout' %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-logout">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
+            </div>
         </div>
     </nav>
 
     <!-- Main Content -->
     <section class="hero-section">
-        <h1>Welcome to organize charity</h1>
+        <h1>Welcome to Organize Charity</h1>
         <p>Manage campaigns, track donations, and keep your organization running smoothly</p>
-        
     </section>
 
-   
+    <!-- Footer -->
+    <footer>
+        &copy; {{ year }} CharityOrg. All rights reserved.
+    </footer>
 
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script> <!-- FontAwesome Icons -->
+    <script>
+        function toggleMenu() {
+            var navLinks = document.getElementById('nav-links');
+            navLinks.classList.toggle('show');
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
 </body>
 </html>

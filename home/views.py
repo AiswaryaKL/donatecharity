@@ -387,7 +387,7 @@ def create_campaign(request):
                 campaign.created_by = request.user
                 campaign.save()
 
-                messages.success(request, "Your campaign has been submitted for admin approval.")
+                messages.success(request, "")
                 return redirect("campaign_list")
             else:
                 messages.error(request, "You are not associated with any organization.")
@@ -418,7 +418,7 @@ def edit_campaign(request, campaign_id):
             campaign.is_edit_pending = True
             campaign.verified = False  # Require re-verification
             form.save()
-            messages.info(request, "Your campaign edits are submitted for verification.")
+            messages.info(request, "")
             return redirect("campaign_list")
     else:
         form = CampaignForm(instance=campaign)
