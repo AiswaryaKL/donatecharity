@@ -63,20 +63,35 @@
             font-size: 0.875rem;
         }
 
-        .save-btn {
-            background-color: #0d6efd;
-            color: white;
+        .save-btn, .cancel-btn {
             padding: 12px 20px;
             font-size: 1.1rem;
             border: none;
             border-radius: 10px;
-            width: 100%;
+            width: 48%;
             transition: background-color 0.3s ease, transform 0.2s ease;
-            margin-top: 10px;
+        }
+
+        .save-btn {
+            background-color: #0d6efd;
+            color: white;
         }
 
         .save-btn:hover {
             background-color: #0b5ed7;
+            transform: scale(1.03);
+        }
+
+        .cancel-btn {
+            background-color: #6c757d;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .cancel-btn:hover {
+            background-color: #5a6268;
             transform: scale(1.03);
         }
 
@@ -92,6 +107,11 @@
 
             .edit-title {
                 font-size: 1.5rem;
+            }
+
+            .save-btn, .cancel-btn {
+                width: 100%;
+                margin-bottom: 10px;
             }
         }
 
@@ -174,7 +194,10 @@
                 {% endif %}
             </div>
 
-            <button type="submit" class="save-btn">Save Changes</button>
+            <div class="d-flex justify-content-between mt-4">
+                <button type="submit" class="save-btn">Save Changes</button>
+                <a href="{% url 'donor_profile' %}" class="cancel-btn">Cancel</a>
+            </div>
         </form>
     </div>
 
