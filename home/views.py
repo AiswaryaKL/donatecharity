@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.db import models
 from .models import Donation
 from datetime import datetime
-
+from datetime import date
 from .models import Feedback
 from .forms import DonorFeedbackForm, OrganizationFeedbackForm
 from django.utils.timezone import now
@@ -226,18 +226,40 @@ def manageprofile(request):
     return render(request, 'manageprofile.html', {'form': form})
 @login_required
 def view_campaign(request):
-    # Update campaign status if raised amount meets/exceeds goal or end date has passed
+    # Update campaign status
     Campaign.objects.filter(
         (Q(raised_amount__gte=F('goal_amount')) | Q(end_date__lt=timezone.now())) & Q(status="Ongoing")
     ).update(status="Completed")
-    
+
     # Fetch only verified campaigns
     campaigns = Campaign.objects.filter(verified=True).order_by('-created_at')
-    
-    return render(request, 'view_campaign.html', {'campaigns': campaigns})
 
+    # Check if donor profile is complete
+    try:
+        donor_profile = Donor.objects.get(user=request.user)  # Refresh from DB
+        required_fields = [
+            donor_profile.name,
+            donor_profile.phone,
+            donor_profile.email,
+            donor_profile.address,
+            donor_profile.date_of_birth,
+        ]
+        # Ensure all fields are filled and donor is at least 18
+        profile_complete = all(required_fields)
+        if donor_profile.date_of_birth:
+            today = date.today()
+            age = today.year - donor_profile.date_of_birth.year - (
+                (today.month, today.day) < (donor_profile.date_of_birth.month, donor_profile.date_of_birth.day)
+            )
+            if age < 18:
+                profile_complete = False
+    except Donor.DoesNotExist:
+        profile_complete = False
 
-
+    return render(request, 'view_campaign.html', {
+        'campaigns': campaigns,
+        'profile_complete': profile_complete,
+    })
 
 
 def makedonation(request, campaign_id):

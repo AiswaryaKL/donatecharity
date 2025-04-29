@@ -190,14 +190,14 @@
 
   <!-- Hero Section -->
   <section class="hero-section">
-    <h1>Welcome to Your Donation Platform</h1>
+    <h1>Welcome {{ user.username }} to Donorbox</h1>
     <p>Support meaningful causes and transform lives with your kindness.</p>
     <a href="{% url 'view_campaign' %}" class="btn-donate">Explore Campaigns</a>
   </section>
 
   <!-- Optional Footer -->
   <footer>
-    &copy; 2025 Your Donation Platform. All rights reserved.
+    &copy; 2025 Donorbox. All rights reserved.
   </footer>
 
   <!-- Font Awesome JS -->

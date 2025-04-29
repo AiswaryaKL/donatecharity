@@ -126,6 +126,7 @@
             from {
                 opacity: 0;
             }
+
             to {
                 opacity: 1;
             }
@@ -179,7 +180,7 @@
                         </span>
                     </p>
 
-                    <!-- Donate Button -->
+                    <!-- Donate Button Logic -->
                     {% if campaign.status == 'Completed' %}
                         {% if campaign.end_date < now %}
                             <button class="btn btn-secondary btn-donate mt-auto btn-disabled"
@@ -193,7 +194,14 @@
                             </button>
                         {% endif %}
                     {% else %}
-                        <a href="{% url 'makedonation' campaign.id %}" class="btn btn-success btn-donate mt-auto">Donate Now</a>
+                        {% if profile_complete %}
+                            <a href="{% url 'makedonation' campaign.id %}" class="btn btn-success btn-donate mt-auto">Donate Now</a>
+                        {% else %}
+                            <button class="btn btn-secondary btn-donate mt-auto btn-disabled"
+                                onclick="alert('⚠️ Please complete your profile before donating.')">
+                                Donate Now
+                            </button>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>

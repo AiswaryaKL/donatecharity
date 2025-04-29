@@ -35,8 +35,11 @@ class DonorRegistrationForm(forms.ModelForm):
     def clean_phone(self):
         phone = self.cleaned_data.get('phone', '').strip()
         if not phone.isdigit() or len(phone) != 10:
-            raise forms.ValidationError("Please enter a valid 10-digit phone number.")
+             raise forms.ValidationError("Please enter a valid 10-digit phone number.")
+        if phone[0] not in ('9', '8', '7', '6'):
+             raise forms.ValidationError("Phone number must start with 9, 8, 7, or 6.")
         return phone
+
 
     def clean(self):
         cleaned_data = super().clean()
@@ -77,8 +80,10 @@ class CheckoutForm(forms.Form):
 
     def clean_phone(self):
         phone = self.cleaned_data.get('phone', '').strip()
-        if not phone.isdigit() or len(phone) < 10:
-            raise forms.ValidationError("Enter a valid phone number with at least 10 digits.")
+        if not phone.isdigit() or len(phone) != 10:
+            raise forms.ValidationError("Enter a valid 10-digit phone number.")
+        if phone[0] not in ('9', '8', '7', '6'):
+            raise forms.ValidationError("Phone number must start with 9, 8, 7, or 6.")
         return phone
 
 
@@ -159,8 +164,10 @@ class CheckoutForm(forms.Form):
 
     def clean_phone(self):
         phone = self.cleaned_data.get('phone', '').strip()
-        if not phone.isdigit() or len(phone) < 10:
-            raise forms.ValidationError("Enter a valid phone number with at least 10 digits.")
+        if not phone.isdigit() or len(phone) != 10:
+            raise forms.ValidationError("Enter a valid 10-digit phone number.")
+        if phone[0] not in ('9', '8', '7', '6'):
+            raise forms.ValidationError("Phone number must start with 9, 8, 7, or 6.")
         return phone
 
 from django import forms
@@ -189,9 +196,11 @@ class OrganizationForm(forms.ModelForm):
 
     # Validate Phone
     def clean_phone(self):
-        phone = self.cleaned_data.get('phone')
-        if not phone.isdigit() or len(phone) < 10 or len(phone) > 15:
-            raise forms.ValidationError("Enter a valid phone number (10-15 digits).")
+        phone = self.cleaned_data.get('phone', '').strip()
+        if not phone.isdigit() or len(phone) != 10:
+            raise forms.ValidationError("Enter a valid 10-digit phone number.")
+        if phone[0] not in ('9', '8', '7', '6'):
+            raise forms.ValidationError("Phone number must start with 9, 8, 7, or 6.")
         return phone
 
     # Validate Address
