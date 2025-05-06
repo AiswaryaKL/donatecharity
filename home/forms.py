@@ -334,8 +334,12 @@ class DonorFeedbackForm(forms.ModelForm):
         message = self.cleaned_data.get('message')
         if not message:
             raise forms.ValidationError("Message is required.")
-        if not re.match(r'^[A-Za-z\s]+$', message.strip()):
-            raise forms.ValidationError("Message should contain only letters and spaces.")
+        
+        # Allow letters, numbers, spaces, and common punctuation marks
+        if not re.match(r'^[A-Za-z0-9\s.,!?\'"():;\-@#&]+$', message.strip()):
+            raise forms.ValidationError(
+                "Message can only contain letters, numbers, spaces, and basic punctuation (e.g., . , ! ? ' \" : ; - @ # &)."
+            )
         return message
 
 class OrganizationFeedbackForm(forms.ModelForm):
@@ -347,8 +351,12 @@ class OrganizationFeedbackForm(forms.ModelForm):
         message = self.cleaned_data.get('message')
         if not message:
             raise forms.ValidationError("Message is required.")
-        if not re.match(r'^[A-Za-z\s]+$', message.strip()):
-            raise forms.ValidationError("Message should contain only letters and spaces.")
+        
+        # Allow letters, numbers, spaces, and basic punctuation
+        if not re.match(r'^[A-Za-z0-9\s.,!?\'"():;\-@#&]+$', message.strip()):
+            raise forms.ValidationError(
+                "Message can only contain letters, numbers, spaces, and basic punctuation (e.g., . , ! ? ' \" : ; - @ # &)."
+            )
         return message
 
 class ComplaintForm(forms.ModelForm):
@@ -358,12 +366,24 @@ class ComplaintForm(forms.ModelForm):
 
     def clean_subject(self):
         subject = self.cleaned_data.get('subject')
-        if not subject.replace(' ', '').isalpha():
-            raise forms.ValidationError("Subject can only contain letters and spaces.")
+        if not subject:
+            raise forms.ValidationError("Subject is required.")
+        
+        # Check for at least one letter, and only allow letters, numbers, spaces, and punctuation
+        if not re.match(r'^[A-Za-z0-9\s.,!?\'"():;\-@#&]+$', subject.strip()) or not re.search(r'[A-Za-z]', subject):
+            raise forms.ValidationError(
+                "Subject must contain letters and may include numbers, spaces, and punctuation. Numbers alone are not allowed."
+            )
         return subject
 
     def clean_message(self):
         message = self.cleaned_data.get('message')
-        if not message.replace(' ', '').isalpha():
-            raise forms.ValidationError("Message can only contain letters and spaces.")
+        if not message:
+            raise forms.ValidationError("Message is required.")
+
+        # Check for at least one letter, and only allow letters, numbers, spaces, and punctuation
+        if not re.match(r'^[A-Za-z0-9\s.,!?\'"():;\-@#&]+$', message.strip()) or not re.search(r'[A-Za-z]', message):
+            raise forms.ValidationError(
+                "Message must contain letters and may include numbers, spaces, and punctuation. Numbers alone are not allowed."
+            )
         return message

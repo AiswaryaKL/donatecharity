@@ -675,7 +675,7 @@ def approve_campaigns(request, campaign_id):
     campaign.verified = True
     campaign.is_edit_pending = False
     campaign.save()
-    messages.success(request, f"Campaign '{campaign.title}' has been approved.")
+    messages.success(request, f"")
     return redirect('verify_campaigns')
 
 @login_required
@@ -689,10 +689,10 @@ def reject_campaigns(request, campaign_id):
         campaign.is_edit_pending = False
         campaign.verified = True  # Revert to previous verified version
         campaign.save()
-        messages.success(request, f"Campaign edits for '{campaign.title}' have been rejected.")
+        messages.success(request, f"")
     else:
         campaign.delete()
-        messages.success(request, f"Campaign '{campaign.title}' has been rejected.")
+        messages.success(request, f"")
     return redirect('verify_campaigns')
 
 

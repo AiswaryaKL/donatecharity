@@ -13,7 +13,7 @@
             font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #ff9a9e, #fad0c4, #ffdde1);
             margin: 0;
-            padding-top: 80px; /* Increased for fixed navbar spacing */
+            padding-top: 80px;
             color: #333;
         }
 
@@ -190,9 +190,19 @@
                         {% endif %}
                     </div>
 
+                    <!-- Title -->
+                    <h3 style="color: #2c3e50; margin: 10px 0;">📌 {{ campaign.title }}</h3>
+
+                    <!-- Description -->
+                    <p style="padding: 0 10px; font-size: 15px; color: #555;">{{ campaign.description }}</p>
+
+                    <!-- End Date -->
+                    <p style="color: #e67e22;"><i class="far fa-calendar-alt"></i> Ends on: {{ campaign.end_date }}</p>
+
+                    <!-- Goal and Raised Amount -->
                     <p class="fw-bold">🎯 Goal: Rs.{{ campaign.goal_amount }}</p>
                     <p class="text-success fw-bold">💰 Raised: Rs.{{ campaign.raised_amount }}</p>
-                    
+
                     <!-- Progress Bar -->
                     <div class="progress">
                         <div class="progress-bar" style="width: {{ campaign.progress_percentage }}%;">

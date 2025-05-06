@@ -129,7 +129,7 @@
     </div>
 </nav>
 <div class="container">
-    <h2 class="title">{{ organization.name }} - Donations</h2>
+    <h2 class="title"> Donations</h2>
 
     <div class="table-container">
         <table class="donation-table">
@@ -137,6 +137,7 @@
                 <tr>
                     <th>Campaign</th>
                     <th>Amount</th>
+                    
                     <th>Payment ID</th>
                     <th>Date</th>
                 </tr>
@@ -145,7 +146,7 @@
                 {% for donation in donations %}
                 <tr class="fade-in">
                     <td>{{ donation.campaign.title }}</td>
-                    <td>${{ donation.amount }}</td>
+                    <td>₹{{ donation.amount }}</td>
                     <td>{{ donation.payment_id }}</td>
                     <td>{{ donation.date }}</td>
                 </tr>
